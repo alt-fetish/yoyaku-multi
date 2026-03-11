@@ -185,6 +185,24 @@ func (r *PostgresApplicantRepo) GetNGSettings(applicantID uuid.UUID) ([]*NGSetti
 	return result, rows.Err()
 }
 
+// UpdateNGSettings は参加者のNG設定を一括更新する（UPSERT）
+func (r *PostgresApplicantRepo) UpdateNGSettings(applicantID uuid.UUID, settings map[string]bool) error {
+	ctx := context.Background()
+	for _, key := range NGActionKeys {
+		isOK := settings[key]
+		_, err := r.DB.Exec(ctx,
+			`INSERT INTO ng_settings (applicant_id, action_key, is_ok)
+			 VALUES ($1, $2, $3)
+			 ON CONFLICT (applicant_id, action_key) DO UPDATE SET is_ok = $3`,
+			applicantID, key, isOK,
+		)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // NGSettingsMap はapplicant_idをキーにしたNGマップを返す（管理者用）
 func (r *PostgresApplicantRepo) GetNGSettingsForApplicants(applicantIDs []uuid.UUID) (map[uuid.UUID][]*NGSetting, error) {
 	if len(applicantIDs) == 0 {

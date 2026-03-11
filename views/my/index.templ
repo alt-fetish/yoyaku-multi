@@ -51,21 +51,28 @@ templ Index(applicant *model.Applicant, entries []*model.EntryWithEvent, ngSetti
 				}
 			</section>
 
-			<!-- NG設定確認 -->
+			<!-- NG設定 -->
 			<section class="mypage-section">
 				<h2 class="mypage-section-title">NG行為設定</h2>
-				<div class="ng-grid">
-					for _, key := range model.NGActionKeys {
-						<div class="ng-grid-item">
-							<span>{ model.NGActionLabels[key] }</span>
-							if isOK(ngSettings, key) {
-								<span class="badge badge-ok">OK</span>
-							} else {
-								<span class="badge badge-ng">NG</span>
-							}
-						</div>
-					}
-				</div>
+				<form method="POST" action={ templ.SafeURL("/my/" + applicant.Token + "/ng-settings") }>
+					<div class="ng-grid">
+						for _, key := range model.NGActionKeys {
+							<label class="ng-grid-item ng-grid-item--selectable">
+								<span>{ model.NGActionLabels[key] }</span>
+								<input
+									type="checkbox"
+									name={ "ng_" + key }
+									value="ok"
+									if isOK(ngSettings, key) {
+										checked
+									}
+								/>
+								<span class="ng-check-label">OK</span>
+							</label>
+						}
+					</div>
+					<button type="submit" class="btn btn-primary" style="margin-top:1rem;">NG設定を保存</button>
+				</form>
 			</section>
 
 			<!-- チャット -->

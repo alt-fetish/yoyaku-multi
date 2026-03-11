@@ -137,6 +137,7 @@ func main() {
 	mux.HandleFunc("GET /my/{token}", eventsHandler.MyPage)
 	mux.HandleFunc("POST /my/{token}/chat", eventsHandler.MyPageChat)
 	mux.HandleFunc("GET /my/{token}/chat/messages", eventsHandler.MyPageChatMessages)
+	mux.HandleFunc("POST /my/{token}/ng-settings", eventsHandler.UpdateNGSettings)
 
 	// --- 管理者ログイン ---
 	mux.HandleFunc("GET /admin/login", func(w http.ResponseWriter, r *http.Request) {

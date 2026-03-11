@@ -699,3 +699,19 @@ tbody tr:hover {
     border-radius: var(--radius-sm);
     font-size: var(--font-size-sm);
 }
+
+.ng-grid-item--selectable {
+    cursor: pointer;
+    gap: var(--space-xs);
+}
+
+.ng-grid-item--selectable input[type="checkbox"] {
+    width: 1.1rem;
+    height: 1.1rem;
+    cursor: pointer;
+}
+
+.ng-check-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}

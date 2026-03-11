@@ -178,6 +178,33 @@ func (h *EventsHandler) MyPageChatMessages(w http.ResponseWriter, r *http.Reques
 	my.ChatMessages(messages).Render(r.Context(), w)
 }
 
+// UpdateNGSettings はマイページからNG設定を更新する
+func (h *EventsHandler) UpdateNGSettings(w http.ResponseWriter, r *http.Request) {
+	token := r.PathValue("token")
+	applicant, err := h.Applicants.GetApplicantByToken(token)
+	if err != nil {
+		http.Error(w, "参加者が見つかりません", http.StatusNotFound)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "フォームの解析に失敗しました", http.StatusBadRequest)
+		return
+	}
+
+	settings := make(map[string]bool)
+	for _, key := range model.NGActionKeys {
+		settings[key] = r.FormValue("ng_"+key) == "ok"
+	}
+
+	if err := h.Applicants.UpdateNGSettings(applicant.ID, settings); err != nil {
+		http.Error(w, "NG設定の更新に失敗しました", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/my/"+token, http.StatusSeeOther)
+}
+
 func getEntryCount(h *EventsHandler, eventID interface{ String() string }) int {
 	return 0 // シンプル化: 実際はDBから取得
 }
