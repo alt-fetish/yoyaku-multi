@@ -1,0 +1,48 @@
+name: Deploy to Oracle Cloud
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+
+      - name: Install templ
+        run: go install github.com/a-h/templ/cmd/templ@latest
+
+      - name: Generate templ
+        run: templ generate
+
+      - name: Build binaries
+        run: |
+          GOOS=linux GOARCH=amd64 go build -o server_bin ./cmd/server/
+          GOOS=linux GOARCH=amd64 go build -o reminder_bin ./cmd/reminder/
+
+      - name: Deploy to server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" > deploy_key
+          chmod 600 deploy_key
+          scp -i deploy_key -o StrictHostKeyChecking=no server_bin $SSH_USER@$SSH_HOST:~/server_bin
+          scp -i deploy_key -o StrictHostKeyChecking=no reminder_bin $SSH_USER@$SSH_HOST:~/reminder_bin
+          scp -i deploy_key -o StrictHostKeyChecking=no -r static $SSH_USER@$SSH_HOST:~/static
+          ssh -i deploy_key -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "
+            sudo mv ~/server_bin /opt/yoyaku/server &&
+            sudo mv ~/reminder_bin /opt/yoyaku/reminder &&
+            sudo cp -r ~/static /opt/yoyaku/static &&
+            sudo systemctl restart yoyaku
+          "
+          rm deploy_key
