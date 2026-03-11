@@ -1,0 +1,112 @@
+package admin_events
+
+import (
+	"fmt"
+	"github.com/ryotaro/yoyaku-multi/internal/model"
+	"github.com/ryotaro/yoyaku-multi/views/layout"
+)
+
+templ Upload(errMsg string) {
+	@layout.AdminBase("CSVアップロード", "events") {
+		<div class="page-header">
+			<h1 class="page-title">CSVアップロード</h1>
+			<a href="/admin/events" class="btn btn-secondary">← 一覧に戻る</a>
+		</div>
+		<div class="card" style="max-width: 680px;">
+			if errMsg != "" {
+				<div class="alert alert-error">{ errMsg }</div>
+			}
+			<div class="alert alert-info mb-md">
+				<strong>CSVフォーマット</strong><br/>
+				ヘッダー行: <code>date,starttime,endtime,type</code><br/>
+				例: <code>2026-04-01,14:00,17:00,solo</code><br/>
+				type は <code>solo</code> または <code>group</code>
+			</div>
+			<form
+				hx-post="/admin/events/upload/preview"
+				hx-target="#preview-area"
+				hx-swap="innerHTML"
+				hx-encoding="multipart/form-data"
+			>
+				<div class="form-group">
+					<label class="form-label">CSVファイル</label>
+					<input class="form-control" type="file" name="csv_file" accept=".csv" required/>
+				</div>
+				<button type="submit" class="btn btn-primary">プレビューを確認する</button>
+			</form>
+			<div id="preview-area" class="mt-lg"></div>
+		</div>
+	}
+}
+
+templ UploadPreview(rows []model.EventRow, parseErrors []model.BulkRowResult, errMsg string) {
+	if errMsg != "" {
+		<div class="alert alert-error">{ errMsg }</div>
+	} else {
+		<h3 style="margin-bottom: var(--space-md); font-size: var(--font-size-base);">プレビュー（{ fmt.Sprintf("%d件", len(rows)) }）</h3>
+		if len(parseErrors) > 0 {
+			<div class="alert alert-warning mb-md">
+				<strong>{ fmt.Sprintf("%d行にエラーがあります（スキップされます）", len(parseErrors)) }</strong>
+				for _, e := range parseErrors {
+					<div>行{ fmt.Sprintf("%d", e.RowNum) }: { e.Reason }</div>
+				}
+			</div>
+		}
+		<div class="table-wrap mb-md">
+			<table>
+				<thead>
+					<tr>
+						<th>日付</th>
+						<th>開始</th>
+						<th>終了</th>
+						<th>種別</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, row := range rows {
+						<tr>
+							<td>{ row.Date }</td>
+							<td>{ row.StartTime }</td>
+							<td>{ row.EndTime }</td>
+							<td>{ row.Type }</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+		<form method="POST" action="/admin/events/upload/confirm">
+			for i, row := range rows {
+				<input type="hidden" name={ fmt.Sprintf("rows[%d][date]", i) } value={ row.Date }/>
+				<input type="hidden" name={ fmt.Sprintf("rows[%d][starttime]", i) } value={ row.StartTime }/>
+				<input type="hidden" name={ fmt.Sprintf("rows[%d][endtime]", i) } value={ row.EndTime }/>
+				<input type="hidden" name={ fmt.Sprintf("rows[%d][type]", i) } value={ row.Type }/>
+			}
+			<button type="submit" class="btn btn-primary" onclick="return confirm('この内容でDBに登録しますか？')">
+				この内容で登録する
+			</button>
+		</form>
+	}
+}
+
+templ UploadResult(result model.BulkResult) {
+	<div class="alert alert-success">
+		<strong>{ fmt.Sprintf("%d件登録しました", result.Inserted) }</strong>
+	</div>
+	if len(result.Skipped) > 0 {
+		<div class="alert alert-warning">
+			<strong>{ fmt.Sprintf("%d件スキップ（重複）", len(result.Skipped)) }</strong>
+			for _, s := range result.Skipped {
+				<div>{ fmt.Sprintf("行%d: %s %s — %s", s.RowNum, s.Row.Date, s.Row.StartTime, s.Reason) }</div>
+			}
+		</div>
+	}
+	if len(result.Errors) > 0 {
+		<div class="alert alert-error">
+			<strong>{ fmt.Sprintf("%d件エラー", len(result.Errors)) }</strong>
+			for _, e := range result.Errors {
+				<div>{ fmt.Sprintf("行%d: %s", e.RowNum, e.Reason) }</div>
+			}
+		</div>
+	}
+	<a href="/admin/events" class="btn btn-primary mt-md">開催日一覧に戻る</a>
+}

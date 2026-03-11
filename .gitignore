@@ -1,0 +1,18 @@
+.env
+*.env.local
+*.log
+*.key
+*.pem
+server_bin
+reminder_bin
+
+# Go
+/tmp/
+/dist/
+
+# templ generated files (optional: some teams commit these)
+# *_templ.go
+
+# OS
+.DS_Store
+Thumbs.db

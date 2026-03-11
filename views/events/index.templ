@@ -1,0 +1,89 @@
+package events
+
+import (
+	"fmt"
+	"github.com/ryotaro/yoyaku-multi/internal/model"
+	"github.com/ryotaro/yoyaku-multi/views/layout"
+)
+
+templ Index(events []*model.EventWithCount, applicantToken string, entryEventIDs map[string]bool) {
+	@layout.Base("開催日一覧") {
+		<div class="container">
+			<div class="page-header">
+				<h1 class="page-title">開催日一覧</h1>
+				if applicantToken == "" {
+					<a href="/register" class="btn btn-secondary">参加者登録</a>
+				} else {
+					<a href={ templ.SafeURL("/my/" + applicantToken) } class="btn btn-secondary">マイページ</a>
+				}
+			</div>
+			if len(events) == 0 {
+				<div class="card" style="text-align: center; padding: var(--space-xl);">
+					<p class="text-muted">現在公開中の開催日はありません。</p>
+				</div>
+			} else {
+				<div class="event-list">
+					for _, e := range events {
+						@EventCard(e, applicantToken, entryEventIDs[e.ID.String()])
+					}
+				</div>
+			}
+		</div>
+	}
+}
+
+templ EventCard(e *model.EventWithCount, applicantToken string, hasEntry bool) {
+	<div class="event-card" id={ "event-" + e.ID.String() }>
+		<div>
+			<div class="event-datetime">
+				{ e.EventDate.Format("2006年1月2日（Mon）") } { e.EventTime.Format("15:04") }〜
+			</div>
+			<div class="event-meta">
+				if e.SessionType == "solo" {
+					<span class="badge badge-solo">ソロ</span>
+				} else {
+					<span class="badge badge-group">グループ</span>
+				}
+				<span class="event-slots text-muted">
+					{ fmt.Sprintf("残枠 %s", slotsText(e.SessionType, e.EntryCount)) }
+				</span>
+			</div>
+		</div>
+		<div>
+			if applicantToken == "" {
+				<a href="/register" class="btn btn-secondary">参加するには登録が必要です</a>
+			} else if hasEntry {
+				<button
+					class="btn btn-secondary"
+					hx-delete={ fmt.Sprintf("/events/%s/entry?token=%s", e.ID.String(), applicantToken) }
+					hx-target={ "#event-" + e.ID.String() }
+					hx-swap="outerHTML"
+					hx-confirm="参加表明を取り消しますか？"
+				>
+					✓ 参加表明済み（取消）
+				</button>
+			} else {
+				<button
+					class="btn btn-primary"
+					hx-post={ fmt.Sprintf("/events/%s/entry?token=%s", e.ID.String(), applicantToken) }
+					hx-target={ "#event-" + e.ID.String() }
+					hx-swap="outerHTML"
+				>
+					参加したい
+				</button>
+			}
+		</div>
+	</div>
+}
+
+func slotsText(sessionType string, entryCount int) string {
+	capacity := 1
+	if sessionType == "group" {
+		capacity = 2
+	}
+	remaining := capacity - entryCount
+	if remaining < 0 {
+		remaining = 0
+	}
+	return fmt.Sprintf("%d / %d", remaining, capacity)
+}

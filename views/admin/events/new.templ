@@ -1,0 +1,106 @@
+package admin_events
+
+import "github.com/ryotaro/yoyaku-multi/views/layout"
+
+templ New(errMsg string) {
+	@layout.AdminBase("セッション登録", "events") {
+		<div class="page-header">
+			<h1 class="page-title">セッション登録</h1>
+			<a href="/admin/events" class="btn btn-secondary">← 一覧に戻る</a>
+		</div>
+		<div class="card" style="max-width: 560px;">
+			if errMsg != "" {
+				<div class="alert alert-error">{ errMsg }</div>
+			}
+			<form method="POST" action="/admin/events">
+				<div class="form-group">
+					<label class="form-label" for="event_date">日付 <span style="color:var(--color-danger)">*</span></label>
+					<input class="form-control" type="date" id="event_date" name="event_date" required/>
+				</div>
+				<div class="form-group">
+					<label class="form-label" for="event_time">開始時刻 <span style="color:var(--color-danger)">*</span></label>
+					<input class="form-control" type="time" id="event_time" name="event_time" required/>
+				</div>
+				<div class="form-group">
+					<label class="form-label" for="end_time">終了時刻（任意）</label>
+					<input class="form-control" type="time" id="end_time" name="end_time"/>
+				</div>
+				<div class="form-group">
+					<label class="form-label" for="session_type">種別 <span style="color:var(--color-danger)">*</span></label>
+					<select class="form-control" id="session_type" name="session_type" required>
+						<option value="solo">ソロ（1名）</option>
+						<option value="group">グループ（2名）</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label class="form-label" for="notes">メモ（内部用・非公開）</label>
+					<textarea class="form-control" id="notes" name="notes" rows="3" placeholder="場所・備考など"></textarea>
+				</div>
+				<div class="form-group">
+					<label style="display: flex; align-items: center; gap: var(--space-sm); cursor: pointer;">
+						<input type="checkbox" name="send_notification" value="1"/>
+						<span>登録後、参加者全員に通知メールを送信する</span>
+					</label>
+				</div>
+				<div class="flex gap-sm mt-md">
+					<button type="submit" class="btn btn-primary">登録する</button>
+					<a href="/admin/events" class="btn btn-secondary">キャンセル</a>
+				</div>
+			</form>
+		</div>
+	}
+}
+
+templ Edit(e *EventFormData, errMsg string) {
+	@layout.AdminBase("開催日編集", "events") {
+		<div class="page-header">
+			<h1 class="page-title">開催日編集</h1>
+			<a href="/admin/events" class="btn btn-secondary">← 一覧に戻る</a>
+		</div>
+		<div class="card" style="max-width: 560px;">
+			if errMsg != "" {
+				<div class="alert alert-error">{ errMsg }</div>
+			}
+			<form method="POST" action={ templ.SafeURL("/admin/events/" + e.ID + "/edit") }>
+				<input type="hidden" name="_method" value="PUT"/>
+				<div class="form-group">
+					<label class="form-label" for="event_date">日付 <span style="color:var(--color-danger)">*</span></label>
+					<input class="form-control" type="date" id="event_date" name="event_date" value={ e.EventDate } required/>
+				</div>
+				<div class="form-group">
+					<label class="form-label" for="event_time">開始時刻 <span style="color:var(--color-danger)">*</span></label>
+					<input class="form-control" type="time" id="event_time" name="event_time" value={ e.EventTime } required/>
+				</div>
+				<div class="form-group">
+					<label class="form-label" for="end_time">終了時刻（任意）</label>
+					<input class="form-control" type="time" id="end_time" name="end_time" value={ e.EndTime }/>
+				</div>
+				<div class="form-group">
+					<label class="form-label" for="session_type">種別</label>
+					<select class="form-control" id="session_type" name="session_type">
+						<option value="solo" selected?={ e.SessionType == "solo" }>ソロ（1名）</option>
+						<option value="group" selected?={ e.SessionType == "group" }>グループ（2名）</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label class="form-label" for="notes">メモ</label>
+					<textarea class="form-control" id="notes" name="notes" rows="3">{ e.Notes }</textarea>
+				</div>
+				<div class="flex gap-sm mt-md">
+					<button type="submit" class="btn btn-primary">更新する</button>
+					<a href="/admin/events" class="btn btn-secondary">キャンセル</a>
+				</div>
+			</form>
+		</div>
+	}
+}
+
+// EventFormData はフォーム表示用のデータ構造
+type EventFormData struct {
+	ID          string
+	SessionType string
+	EventDate   string
+	EventTime   string
+	EndTime     string
+	Notes       string
+}

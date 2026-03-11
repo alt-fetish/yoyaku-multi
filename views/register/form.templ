@@ -1,0 +1,79 @@
+package register
+
+import (
+	"github.com/ryotaro/yoyaku-multi/internal/model"
+	"github.com/ryotaro/yoyaku-multi/views/layout"
+)
+
+templ Form(errMsg string) {
+	@layout.Base("参加者登録") {
+		<div class="container register-page">
+			<div class="card" style="max-width: 560px; margin: 0 auto;">
+				<h1 class="card-title">参加者登録</h1>
+				<p class="text-muted mb-md">
+					交流セッションへの参加を希望される方は、以下のフォームからご登録ください。<br/>
+					<strong style="color: var(--color-text);">成人男性のみ</strong>対象です。
+				</p>
+				if errMsg != "" {
+					<div class="alert alert-error">{ errMsg }</div>
+				}
+				<form method="POST" action="/register">
+					<div class="form-group">
+						<label class="form-label" for="handle">ハンドルネーム <span style="color:var(--color-danger)">*</span></label>
+						<input class="form-control" type="text" id="handle" name="handle" required placeholder="例：Taro"/>
+					</div>
+					<div class="form-group">
+						<label class="form-label" for="email">メールアドレス <span style="color:var(--color-danger)">*</span></label>
+						<input class="form-control" type="email" id="email" name="email" required placeholder="example@email.com"/>
+						<p class="form-hint">登録完了後、マイページURLをお送りします。</p>
+					</div>
+					<div class="form-group">
+						<p class="form-label">NG行為設定</p>
+						<p class="form-hint mb-sm">
+							デフォルトはすべて <strong>NG</strong> です。許可する行為のみ「OK」に変更してください。
+						</p>
+						<div class="checklist">
+							for _, key := range model.NGActionKeys {
+								<div class="checklist-item">
+									<span class="checklist-label">{ model.NGActionLabels[key] }</span>
+									<div class="checklist-toggle">
+										<label>
+											<input type="radio" name={ "ng_" + key } value="ng" checked/>
+											<span class="badge badge-ng">NG</span>
+										</label>
+										<label>
+											<input type="radio" name={ "ng_" + key } value="ok"/>
+											<span class="badge badge-ok">OK</span>
+										</label>
+									</div>
+								</div>
+							}
+						</div>
+					</div>
+					<button type="submit" class="btn btn-primary btn-lg w-full" style="margin-top: var(--space-lg);">
+						登録する
+					</button>
+				</form>
+			</div>
+		</div>
+	}
+}
+
+templ Done(handle, mypageURL string) {
+	@layout.Base("登録完了") {
+		<div class="container register-page">
+			<div class="card" style="max-width: 560px; margin: 0 auto; text-align: center;">
+				<div style="font-size: 48px; margin-bottom: var(--space-md);">✅</div>
+				<h1 class="card-title">登録完了</h1>
+				<p>{ handle } さん、ご登録ありがとうございます。</p>
+				<p class="text-muted mt-sm">マイページのURLを登録メールアドレスにお送りしました。</p>
+				<div style="margin: var(--space-lg) 0; padding: var(--space-md); background: var(--color-surface-2); border-radius: var(--radius); border: 1px solid var(--color-border);">
+					<p class="text-muted text-sm mb-sm">マイページURL</p>
+					<a href={ templ.SafeURL(mypageURL) } class="text-accent" style="word-break: break-all;">{ mypageURL }</a>
+				</div>
+				<p class="text-muted text-sm">このURLは大切に保管してください。ログイン不要でアクセスできます。</p>
+				<a href="/events" class="btn btn-primary mt-lg">開催日一覧を見る</a>
+			</div>
+		</div>
+	}
+}

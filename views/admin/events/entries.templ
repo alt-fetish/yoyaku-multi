@@ -1,0 +1,192 @@
+package admin_events
+
+import (
+	"fmt"
+	"github.com/ryotaro/yoyaku-multi/internal/model"
+	"github.com/ryotaro/yoyaku-multi/views/layout"
+)
+
+templ Entries(event *model.Event, entries []*model.EntryWithApplicant) {
+	@layout.AdminBase("参加表明者一覧", "events") {
+		<div class="page-header">
+			<h1 class="page-title">
+				{ event.EventDate.Format("2006/01/02") } { event.EventTime.Format("15:04") } 参加表明者
+			</h1>
+			<a href="/admin/events" class="btn btn-secondary">← 一覧に戻る</a>
+		</div>
+
+		<div class="flex gap-sm mb-md">
+			<span class="badge badge-open">{ fmt.Sprintf("%d名の表明", len(entries)) }</span>
+			if event.SessionType == "solo" {
+				<span class="badge badge-solo">ソロ（定員1名）</span>
+			} else {
+				<span class="badge badge-group">グループ（定員2名）</span>
+			}
+		</div>
+
+		if len(entries) == 0 {
+			<div class="card" style="text-align: center;">
+				<p class="text-muted">まだ参加表明がありません。</p>
+			</div>
+		} else {
+			<form method="POST" action={ templ.SafeURL(fmt.Sprintf("/admin/events/%s/confirm", event.ID.String())) }>
+				<div class="table-wrap mb-md">
+					<table>
+						<thead>
+							<tr>
+								<th>選択</th>
+								<th>ハンドル</th>
+								<th>表明日時</th>
+								<th>ステータス</th>
+								for _, key := range model.NGActionKeys {
+									<th>{ model.NGActionLabels[key] }</th>
+								}
+							</tr>
+						</thead>
+						<tbody>
+							for _, entry := range entries {
+								<tr>
+									<td>
+										if entry.Status == "pending" {
+											<input type="checkbox" name="applicant_ids" value={ entry.ApplicantID.String() }/>
+										}
+									</td>
+									<td>{ entry.Handle }</td>
+									<td>{ entry.CreatedAt.Format("1/2 15:04") }</td>
+									<td>{ entryStatusLabel(entry.Status) }</td>
+									for _, key := range model.NGActionKeys {
+										<td>{ ngBadge(entry.NGSettings, key) }</td>
+									}
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+
+				if event.Status == "open" {
+					<div class="flex gap-sm">
+						<button type="submit" class="btn btn-primary" onclick="return confirm('選択した参加者を確定しますか？確定後は変更できません。')">
+							参加者を確定する
+						</button>
+						<button
+							type="submit"
+							formaction={ templ.SafeURL(fmt.Sprintf("/admin/events/%s/decline", event.ID.String())) }
+							class="btn btn-secondary"
+						>
+							見送り通知を送る（任意）
+						</button>
+					</div>
+				}
+			</form>
+
+			if event.SessionType == "group" && len(entries) >= 2 {
+				<hr class="divider"/>
+				<h2 class="mypage-section-title">NG比較ビュー（グループ用）</h2>
+				<p class="text-muted text-sm mb-md">2名のチェックボックスを選択すると、NG設定の相互比較が表示されます。</p>
+				<form
+					hx-get={ fmt.Sprintf("/admin/events/%s/entries/compare", event.ID.String()) }
+					hx-target="#compare-result"
+					hx-trigger="change"
+				>
+					<div class="flex gap-md flex-wrap mb-md">
+						for _, entry := range entries {
+							<label style="display: flex; align-items: center; gap: var(--space-sm);">
+								<input type="checkbox" name="ids" value={ entry.ApplicantID.String() }/>
+								{ entry.Handle }
+							</label>
+						}
+					</div>
+				</form>
+				<div id="compare-result"></div>
+			}
+		}
+	}
+}
+
+templ CompareView(entries []*model.EntryWithApplicant) {
+	if len(entries) != 2 {
+		<p class="text-muted">2名を選択してください。</p>
+	} else {
+		<div class="table-wrap">
+			<table>
+				<thead>
+					<tr>
+						<th>行為</th>
+						<th>{ entries[0].Handle }</th>
+						<th>{ entries[1].Handle }</th>
+						<th>判定</th>
+					</tr>
+				</thead>
+				<tbody>
+					for _, key := range model.NGActionKeys {
+						<tr class={ compareRowClass(entries[0].NGSettings, entries[1].NGSettings, key) }>
+							<td>{ model.NGActionLabels[key] }</td>
+							<td>{ ngBadge(entries[0].NGSettings, key) }</td>
+							<td>{ ngBadge(entries[1].NGSettings, key) }</td>
+							<td>{ compareResult(entries[0].NGSettings, entries[1].NGSettings, key) }</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	}
+}
+
+func entryStatusLabel(s string) string {
+	switch s {
+	case "pending":
+		return "表明中"
+	case "confirmed":
+		return "確定"
+	case "declined":
+		return "見送り"
+	case "cancelled":
+		return "取消"
+	}
+	return s
+}
+
+func ngBadge(settings []*model.NGSetting, key string) string {
+	for _, s := range settings {
+		if s.ActionKey == key {
+			if s.IsOK {
+				return "OK"
+			}
+			return "NG"
+		}
+	}
+	return "NG"
+}
+
+func isOKSettings(settings []*model.NGSetting, key string) bool {
+	for _, s := range settings {
+		if s.ActionKey == key {
+			return s.IsOK
+		}
+	}
+	return false
+}
+
+func compareRowClass(s1, s2 []*model.NGSetting, key string) string {
+	ok1 := isOKSettings(s1, key)
+	ok2 := isOKSettings(s2, key)
+	if ok1 && ok2 {
+		return "ng-both-ok"
+	}
+	if !ok1 && !ok2 {
+		return "ng-both-ng"
+	}
+	return "ng-one-ng"
+}
+
+func compareResult(s1, s2 []*model.NGSetting, key string) string {
+	ok1 := isOKSettings(s1, key)
+	ok2 := isOKSettings(s2, key)
+	if ok1 && ok2 {
+		return "✅ 両者OK"
+	}
+	if !ok1 && !ok2 {
+		return "❌ 両者NG"
+	}
+	return "⚠️ 片方NG"
+}

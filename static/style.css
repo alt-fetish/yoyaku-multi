@@ -1,0 +1,701 @@
+/* =========================
+   1. Reset / Base
+   ========================= */
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: var(--font-size-base);
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-base);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+a {
+    color: var(--color-accent);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+ul, ol {
+    list-style: none;
+}
+
+/* =========================
+   2. Design Tokens
+   ========================= */
+
+:root {
+    /* カラー */
+    --color-bg:        #0f0f0f;
+    --color-surface:   #1a1a1a;
+    --color-surface-2: #222222;
+    --color-border:    #2e2e2e;
+    --color-accent:    #c0392b;
+    --color-accent-hover: #e74c3c;
+    --color-text:      #e0e0e0;
+    --color-muted:     #888888;
+    --color-success:   #27ae60;
+    --color-warning:   #f39c12;
+    --color-danger:    #e74c3c;
+    --color-info:      #2980b9;
+
+    /* タイポグラフィ */
+    --font-base: 'Helvetica Neue', Arial, sans-serif;
+    --font-size-base: 16px;
+    --font-size-sm: 0.875rem;
+    --font-size-lg: 1.125rem;
+    --font-size-xl: 1.5rem;
+    --font-size-2xl: 2rem;
+
+    /* スペーシング */
+    --space-xs:  4px;
+    --space-sm:  8px;
+    --space-md:  16px;
+    --space-lg:  32px;
+    --space-xl:  48px;
+
+    /* その他 */
+    --radius:    6px;
+    --radius-sm: 4px;
+    --shadow:    0 2px 8px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.6);
+
+    /* サイドバー幅 */
+    --sidebar-width: 220px;
+}
+
+/* =========================
+   3. Layout
+   ========================= */
+
+.container {
+    padding: var(--space-md);
+}
+
+@media (min-width: 768px) {
+    .container {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: var(--space-lg);
+    }
+}
+
+/* 管理者レイアウト */
+.admin-wrapper {
+    min-height: 100vh;
+}
+
+.admin-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+@media (min-width: 768px) {
+    .admin-layout {
+        display: grid;
+        grid-template-columns: var(--sidebar-width) 1fr;
+        grid-template-rows: auto 1fr;
+    }
+}
+
+/* ヘッダー */
+.site-header {
+    background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    padding: var(--space-md) var(--space-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.site-header .logo {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    color: var(--color-accent);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+}
+
+.site-header .logo:hover {
+    text-decoration: none;
+    color: var(--color-accent-hover);
+}
+
+/* サイドバー */
+.admin-sidebar {
+    background-color: var(--color-surface);
+    border-right: 1px solid var(--color-border);
+    padding: var(--space-lg) 0;
+}
+
+.admin-sidebar nav ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+}
+
+.admin-sidebar nav a {
+    display: block;
+    padding: var(--space-sm) var(--space-md);
+    color: var(--color-text);
+    text-decoration: none;
+    font-size: var(--font-size-sm);
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+}
+
+.admin-sidebar nav a:hover,
+.admin-sidebar nav a.active {
+    background-color: var(--color-surface-2);
+    border-left-color: var(--color-accent);
+    color: var(--color-text);
+    text-decoration: none;
+}
+
+.admin-main {
+    padding: var(--space-lg);
+    overflow-x: auto;
+}
+
+/* メインコンテンツ */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-lg);
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+.page-title {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+.page-actions {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+/* =========================
+   4. Components
+   ========================= */
+
+/* --- Button --- */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-md);
+    border: none;
+    border-radius: var(--radius);
+    font-size: var(--font-size-sm);
+    font-family: var(--font-base);
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+    white-space: nowrap;
+}
+
+.btn:hover {
+    text-decoration: none;
+    filter: brightness(1.1);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background-color: var(--color-accent);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: var(--color-accent-hover);
+}
+
+.btn-secondary {
+    background-color: var(--color-surface-2);
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+    background-color: var(--color-surface);
+    border-color: var(--color-muted);
+}
+
+.btn-danger {
+    background-color: var(--color-danger);
+    color: #fff;
+}
+
+.btn-success {
+    background-color: var(--color-success);
+    color: #fff;
+}
+
+.btn-sm {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: 0.8125rem;
+}
+
+.btn-lg {
+    padding: var(--space-md) var(--space-lg);
+    font-size: var(--font-size-lg);
+}
+
+/* --- Form --- */
+.form-group {
+    margin-bottom: var(--space-md);
+}
+
+.form-label {
+    display: block;
+    margin-bottom: var(--space-xs);
+    font-size: var(--font-size-sm);
+    color: var(--color-muted);
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    padding: var(--space-sm) var(--space-md);
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-text);
+    font-size: var(--font-size-base);
+    font-family: var(--font-base);
+    transition: border-color 0.15s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.form-control::placeholder {
+    color: var(--color-muted);
+}
+
+.form-hint {
+    margin-top: var(--space-xs);
+    font-size: var(--font-size-sm);
+    color: var(--color-muted);
+}
+
+.form-error {
+    margin-top: var(--space-xs);
+    font-size: var(--font-size-sm);
+    color: var(--color-danger);
+}
+
+/* チェックリスト */
+.checklist {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-sm) var(--space-md);
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+}
+
+.checklist-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+}
+
+.checklist-toggle {
+    display: flex;
+    gap: var(--space-xs);
+}
+
+.checklist-toggle label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    padding: 2px var(--space-sm);
+    border-radius: var(--radius-sm);
+}
+
+.checklist-toggle input[type="radio"] {
+    accent-color: var(--color-accent);
+}
+
+/* --- Table --- */
+.table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--font-size-sm);
+}
+
+thead {
+    background-color: var(--color-surface);
+}
+
+th {
+    padding: var(--space-sm) var(--space-md);
+    text-align: left;
+    color: var(--color-muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--color-border);
+    white-space: nowrap;
+}
+
+td {
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: middle;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tbody tr:hover {
+    background-color: var(--color-surface-2);
+}
+
+/* --- Badge --- */
+.badge {
+    display: inline-block;
+    padding: 2px var(--space-sm);
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.badge-open     { background-color: rgba(39,174,96,0.2);  color: var(--color-success); }
+.badge-confirmed{ background-color: rgba(41,128,185,0.2); color: var(--color-info); }
+.badge-done     { background-color: rgba(136,136,136,0.2);color: var(--color-muted); }
+.badge-cancelled{ background-color: rgba(231,76,60,0.2);  color: var(--color-danger); }
+.badge-pending  { background-color: rgba(243,156,18,0.2); color: var(--color-warning); }
+.badge-declined { background-color: rgba(136,136,136,0.2);color: var(--color-muted); }
+
+.badge-solo  { background-color: rgba(192,57,43,0.2); color: var(--color-accent); }
+.badge-group { background-color: rgba(41,128,185,0.2); color: var(--color-info); }
+
+.badge-ok { background-color: rgba(39,174,96,0.15);  color: var(--color-success); }
+.badge-ng { background-color: rgba(231,76,60,0.15);  color: var(--color-danger); }
+
+/* 未読バッジ */
+.unread-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 var(--space-xs);
+    background-color: var(--color-accent);
+    color: #fff;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+/* --- Card --- */
+.card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--space-lg);
+    box-shadow: var(--shadow);
+}
+
+.card-title {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    margin-bottom: var(--space-md);
+    color: var(--color-text);
+}
+
+/* --- Alert --- */
+.alert {
+    padding: var(--space-md);
+    border-radius: var(--radius);
+    margin-bottom: var(--space-md);
+    font-size: var(--font-size-sm);
+    border-left: 4px solid;
+}
+
+.alert-success { background: rgba(39,174,96,0.1);  border-color: var(--color-success); color: var(--color-success); }
+.alert-error   { background: rgba(231,76,60,0.1);  border-color: var(--color-danger);  color: var(--color-danger); }
+.alert-warning { background: rgba(243,156,18,0.1); border-color: var(--color-warning); color: var(--color-warning); }
+.alert-info    { background: rgba(41,128,185,0.1); border-color: var(--color-info);    color: var(--color-info); }
+
+/* --- Chat 吹き出し --- */
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    max-height: 480px;
+    overflow-y: auto;
+    padding: var(--space-md);
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+}
+
+.chat-bubble {
+    max-width: 75%;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius);
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+}
+
+.chat-bubble--admin {
+    background-color: var(--color-accent);
+    color: #fff;
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+}
+
+.chat-bubble--applicant {
+    background-color: var(--color-surface-2);
+    color: var(--color-text);
+    align-self: flex-start;
+    border: 1px solid var(--color-border);
+    border-bottom-left-radius: 2px;
+}
+
+.chat-meta {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    margin-top: 2px;
+}
+
+.chat-meta--admin  { text-align: right; }
+.chat-meta--applicant { text-align: left; }
+
+.chat-form {
+    display: flex;
+    gap: var(--space-sm);
+    margin-top: var(--space-md);
+}
+
+.chat-form .form-control {
+    flex: 1;
+}
+
+/* --- NG 比較テーブル --- */
+.ng-both-ok   { background-color: rgba(39,174,96,0.08); }
+.ng-one-ng    { background-color: rgba(243,156,18,0.08); }
+.ng-both-ng   { background-color: rgba(231,76,60,0.08); }
+
+/* --- Divider --- */
+.divider {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: var(--space-lg) 0;
+}
+
+/* --- Spinner --- */
+.htmx-indicator {
+    display: none;
+}
+
+.htmx-request .htmx-indicator {
+    display: inline-block;
+}
+
+/* =========================
+   5. Pages
+   ========================= */
+
+/* --- Admin Login --- */
+.login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-md);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-title {
+    font-size: var(--font-size-xl);
+    font-weight: 700;
+    margin-bottom: var(--space-lg);
+    color: var(--color-accent);
+    text-align: center;
+}
+
+/* --- Events (参加者側) --- */
+.event-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.event-card {
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--space-md) var(--space-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+.event-datetime {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+}
+
+.event-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+    margin-top: var(--space-xs);
+}
+
+.event-slots {
+    font-size: var(--font-size-sm);
+    color: var(--color-muted);
+}
+
+/* --- Register --- */
+.register-page {
+    min-height: 100vh;
+    padding: var(--space-lg) var(--space-md);
+}
+
+/* --- MyPage --- */
+.mypage-section {
+    margin-bottom: var(--space-xl);
+}
+
+.mypage-section-title {
+    font-size: var(--font-size-lg);
+    font-weight: 700;
+    margin-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* --- CSV Upload --- */
+.csv-preview-ok     { color: var(--color-success); }
+.csv-preview-skip   { color: var(--color-warning); }
+.csv-preview-error  { color: var(--color-danger); }
+
+.preview-row-ok     { }
+.preview-row-skip   { background-color: rgba(243,156,18,0.05); }
+.preview-row-error  { background-color: rgba(231,76,60,0.05); text-decoration: line-through; opacity: 0.6; }
+
+/* =========================
+   6. Utilities
+   ========================= */
+
+.text-muted    { color: var(--color-muted); }
+.text-accent   { color: var(--color-accent); }
+.text-success  { color: var(--color-success); }
+.text-danger   { color: var(--color-danger); }
+.text-warning  { color: var(--color-warning); }
+.text-sm       { font-size: var(--font-size-sm); }
+.text-lg       { font-size: var(--font-size-lg); }
+.text-right    { text-align: right; }
+.text-center   { text-align: center; }
+
+.flex          { display: flex; }
+.flex-col      { flex-direction: column; }
+.items-center  { align-items: center; }
+.justify-between{ justify-content: space-between; }
+.gap-sm        { gap: var(--space-sm); }
+.gap-md        { gap: var(--space-md); }
+.flex-wrap     { flex-wrap: wrap; }
+
+.mt-sm  { margin-top: var(--space-sm); }
+.mt-md  { margin-top: var(--space-md); }
+.mt-lg  { margin-top: var(--space-lg); }
+.mb-sm  { margin-bottom: var(--space-sm); }
+.mb-md  { margin-bottom: var(--space-md); }
+.mb-lg  { margin-bottom: var(--space-lg); }
+
+.w-full  { width: 100%; }
+.hidden  { display: none; }
+
+/* フィルターバー */
+.filter-bar {
+    display: flex;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+    flex-wrap: wrap;
+}
+
+.filter-bar select {
+    padding: var(--space-xs) var(--space-sm);
+    background-color: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+}
+
+/* NG設定グリッド */
+.ng-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--space-sm);
+}
+
+.ng-grid-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-xs) var(--space-sm);
+    background-color: var(--color-surface-2);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+}

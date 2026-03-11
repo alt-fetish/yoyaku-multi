@@ -1,0 +1,71 @@
+package layout
+
+templ Base(title string) {
+	<!DOCTYPE html>
+	<html lang="ja">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ title } — ALT-FETISH</title>
+			<link rel="stylesheet" href="/static/style.css"/>
+			<script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
+		</head>
+		<body>
+			<header class="site-header">
+				<a href="/" class="logo">ALT-FETISH</a>
+				<nav>
+					<a href="/events">開催日一覧</a>
+				</nav>
+			</header>
+			<main>
+				{ children... }
+			</main>
+		</body>
+	</html>
+}
+
+templ AdminBase(title string, currentPath string) {
+	<!DOCTYPE html>
+	<html lang="ja">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ title } — 管理</title>
+			<link rel="stylesheet" href="/static/style.css"/>
+			<script src="https://unpkg.com/htmx.org@1.9.12" integrity="sha384-ujb1lZYygJmzgSwoxRggbCHcjc0rB2XoQrxeTUQyRjrOnlCoYta87iKBWq3EsdM2" crossorigin="anonymous"></script>
+		</head>
+		<body class="admin-wrapper">
+			<div class="admin-layout">
+				<aside class="admin-sidebar">
+					<nav>
+						<ul>
+							<li>
+								<a href="/admin/events" class={ templ.KV("active", currentPath == "events") }>
+									📅 開催日管理
+								</a>
+							</li>
+							<li>
+								<a href="/admin/applicants" class={ templ.KV("active", currentPath == "applicants") }>
+									👥 参加者管理
+								</a>
+							</li>
+							<li>
+								<a href="/admin/sessions" class={ templ.KV("active", currentPath == "sessions") }>
+									📋 セッション履歴
+								</a>
+							</li>
+							<li>
+								<a href="/admin/logout" style="margin-top: auto; color: var(--color-muted);">
+									ログアウト
+								</a>
+							</li>
+						</ul>
+					</nav>
+				</aside>
+				<main class="admin-main">
+					{ children... }
+				</main>
+			</div>
+		</body>
+	</html>
+}

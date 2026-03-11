@@ -1,0 +1,113 @@
+package admin_events
+
+import (
+	"fmt"
+	"github.com/ryotaro/yoyaku-multi/internal/model"
+	"github.com/ryotaro/yoyaku-multi/views/layout"
+)
+
+templ Index(events []*model.EventWithCount, statusFilter string) {
+	@layout.AdminBase("開催日管理", "events") {
+		<div class="page-header">
+			<h1 class="page-title">開催日管理</h1>
+			<div class="page-actions">
+				<a href="/admin/events/new" class="btn btn-primary">＋ セッション登録</a>
+				<a href="/admin/events/upload" class="btn btn-secondary">📎 CSVアップロード</a>
+			</div>
+		</div>
+
+		<div class="filter-bar">
+			<a href="/admin/events" class={ btnClass(statusFilter == "") }>すべて</a>
+			<a href="/admin/events?status=open" class={ btnClass(statusFilter == "open") }>募集中</a>
+			<a href="/admin/events?status=confirmed" class={ btnClass(statusFilter == "confirmed") }>確定済</a>
+			<a href="/admin/events?status=done" class={ btnClass(statusFilter == "done") }>実施済</a>
+			<a href="/admin/events?status=cancelled" class={ btnClass(statusFilter == "cancelled") }>キャンセル</a>
+		</div>
+
+		<div class="table-wrap">
+			<table>
+				<thead>
+					<tr>
+						<th>日時</th>
+						<th>種別</th>
+						<th>参加表明</th>
+						<th>ステータス</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					if len(events) == 0 {
+						<tr>
+							<td colspan="5" class="text-muted text-center" style="padding: var(--space-lg);">
+								開催日がありません
+							</td>
+						</tr>
+					}
+					for _, e := range events {
+						<tr id={ "event-row-" + e.ID.String() }>
+							<td>
+								{ e.EventDate.Format("2006/01/02") } { e.EventTime.Format("15:04") }
+								if e.EndTime != nil {
+									{ "〜" + e.EndTime.Format("15:04") }
+								}
+							</td>
+							<td>
+								if e.SessionType == "solo" {
+									<span class="badge badge-solo">ソロ</span>
+								} else {
+									<span class="badge badge-group">グループ</span>
+								}
+							</td>
+							<td>
+								<a href={ templ.SafeURL(fmt.Sprintf("/admin/events/%s/entries", e.ID.String())) }>
+									{ fmt.Sprintf("%d名", e.EntryCount) }
+								</a>
+							</td>
+							<td>{ statusBadge(e.Status) }</td>
+							<td>
+								<div class="flex gap-sm">
+									if e.Status == "open" {
+										<a href={ templ.SafeURL(fmt.Sprintf("/admin/events/%s/edit", e.ID.String())) } class="btn btn-secondary btn-sm">編集</a>
+										<button
+											class="btn btn-danger btn-sm"
+											hx-delete={ fmt.Sprintf("/admin/events/%s", e.ID.String()) }
+											hx-target={ "#event-row-" + e.ID.String() }
+											hx-swap="outerHTML"
+											hx-confirm="この開催日を削除しますか？"
+										>削除</button>
+									}
+									if e.Status == "confirmed" {
+										<form method="POST" action={ templ.SafeURL(fmt.Sprintf("/admin/events/%s/done", e.ID.String())) } style="display:inline;">
+											<button type="submit" class="btn btn-secondary btn-sm" onclick="return confirm('実施済みにしますか？')">実施済みに</button>
+										</form>
+									}
+								</div>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	}
+}
+
+func btnClass(active bool) string {
+	if active {
+		return "btn btn-primary btn-sm"
+	}
+	return "btn btn-secondary btn-sm"
+}
+
+func statusBadge(status string) string {
+	switch status {
+	case "open":
+		return "募集中"
+	case "confirmed":
+		return "確定済"
+	case "done":
+		return "実施済"
+	case "cancelled":
+		return "キャンセル"
+	}
+	return status
+}

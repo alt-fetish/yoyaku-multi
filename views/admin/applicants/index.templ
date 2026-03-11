@@ -1,0 +1,175 @@
+package admin_applicants
+
+import (
+	"fmt"
+	"github.com/ryotaro/yoyaku-multi/internal/model"
+	"github.com/ryotaro/yoyaku-multi/views/layout"
+)
+
+templ Index(applicants []*model.ApplicantWithCount) {
+	@layout.AdminBase("参加者管理", "applicants") {
+		<div class="page-header">
+			<h1 class="page-title">参加者管理</h1>
+		</div>
+		<div class="table-wrap">
+			<table>
+				<thead>
+					<tr>
+						<th>ハンドル</th>
+						<th>メール</th>
+						<th>参加回数</th>
+						<th>登録日</th>
+						<th>未読</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					if len(applicants) == 0 {
+						<tr>
+							<td colspan="6" class="text-muted text-center" style="padding: var(--space-lg);">
+								登録者がいません
+							</td>
+						</tr>
+					}
+					for _, a := range applicants {
+						<tr>
+							<td>{ a.Handle }</td>
+							<td><a href={ templ.SafeURL("mailto:" + a.Email) }>{ a.Email }</a></td>
+							<td>{ fmt.Sprintf("%d回", a.SessionCount) }</td>
+							<td>{ a.CreatedAt.Format("2006/01/02") }</td>
+							<td>
+								if a.UnreadCount > 0 {
+									<span class="unread-badge">{ fmt.Sprintf("%d", a.UnreadCount) }</span>
+								}
+							</td>
+							<td>
+								<div class="flex gap-sm">
+									<a href={ templ.SafeURL(fmt.Sprintf("/admin/applicants/%s", a.ID.String())) } class="btn btn-secondary btn-sm">詳細</a>
+									<a href={ templ.SafeURL(fmt.Sprintf("/admin/chat/%s", a.ID.String())) } class="btn btn-secondary btn-sm">チャット</a>
+								</div>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	}
+}
+
+templ Show(a *model.Applicant, ngSettings []*model.NGSetting, entries []*model.EntryWithEvent) {
+	@layout.AdminBase(a.Handle + " の詳細", "applicants") {
+		<div class="page-header">
+			<h1 class="page-title">{ a.Handle }</h1>
+			<div class="page-actions">
+				<a href={ templ.SafeURL(fmt.Sprintf("/admin/chat/%s", a.ID.String())) } class="btn btn-primary">チャット</a>
+				<a href="/admin/applicants" class="btn btn-secondary">← 一覧に戻る</a>
+			</div>
+		</div>
+		<div style="display: grid; gap: var(--space-lg); grid-template-columns: 1fr 1fr;">
+			<div class="card">
+				<h3 class="card-title">基本情報</h3>
+				<table>
+					<tr><th style="width: 120px;">ハンドル</th><td>{ a.Handle }</td></tr>
+					<tr><th>メール</th><td><a href={ templ.SafeURL("mailto:" + a.Email) }>{ a.Email }</a></td></tr>
+					<tr><th>登録日</th><td>{ a.CreatedAt.Format("2006/01/02") }</td></tr>
+					<tr><th>ステータス</th><td>{ a.Status }</td></tr>
+					<tr>
+						<th>マイページURL</th>
+						<td>
+							<div class="flex gap-sm" style="align-items: center; flex-wrap: wrap;">
+								<code id="mypage-url" data-token={ a.Token } style="font-size: 0.85em; word-break: break-all;"></code>
+								<button class="btn btn-secondary btn-sm" type="button" onclick="copyMyPageURL()">コピー</button>
+							</div>
+						</td>
+					</tr>
+				</table>
+				<script>
+					(function() {
+						var el = document.getElementById("mypage-url");
+						el.textContent = location.origin + "/my/" + el.dataset.token;
+					})();
+					function copyMyPageURL() {
+						var url = document.getElementById("mypage-url").textContent;
+						navigator.clipboard.writeText(url).then(function() {
+							var btn = event.target;
+							btn.textContent = "コピー済み";
+							setTimeout(function() { btn.textContent = "コピー"; }, 2000);
+						});
+					}
+				</script>
+			</div>
+			<div class="card">
+				<h3 class="card-title">NG行為設定</h3>
+				<div class="ng-grid">
+					for _, key := range model.NGActionKeys {
+						<div class="ng-grid-item">
+							<span>{ model.NGActionLabels[key] }</span>
+							if isOK(ngSettings, key) {
+								<span class="badge badge-ok">OK</span>
+							} else {
+								<span class="badge badge-ng">NG</span>
+							}
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+
+		<div class="card mt-lg">
+			<h3 class="card-title">参加履歴</h3>
+			if len(entries) == 0 {
+				<p class="text-muted">参加表明がありません。</p>
+			} else {
+				<div class="table-wrap">
+					<table>
+						<thead>
+							<tr>
+								<th>日時</th>
+								<th>種別</th>
+								<th>ステータス</th>
+							</tr>
+						</thead>
+						<tbody>
+							for _, e := range entries {
+								<tr>
+									<td>{ e.Event.EventDate.Format("2006/01/02") } { e.Event.EventTime.Format("15:04") }</td>
+									<td>
+										if e.Event.SessionType == "solo" {
+											<span class="badge badge-solo">ソロ</span>
+										} else {
+											<span class="badge badge-group">グループ</span>
+										}
+									</td>
+									<td>{ entryStatusLabel(e.Status) }</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			}
+		</div>
+	}
+}
+
+func isOK(settings []*model.NGSetting, key string) bool {
+	for _, s := range settings {
+		if s.ActionKey == key {
+			return s.IsOK
+		}
+	}
+	return false
+}
+
+func entryStatusLabel(s string) string {
+	switch s {
+	case "pending":
+		return "表明中"
+	case "confirmed":
+		return "確定"
+	case "declined":
+		return "見送り"
+	case "cancelled":
+		return "取消"
+	}
+	return s
+}

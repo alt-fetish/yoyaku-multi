@@ -1,0 +1,249 @@
+package admin_sessions
+
+import (
+	"fmt"
+	"github.com/ryotaro/yoyaku-multi/internal/model"
+	"github.com/ryotaro/yoyaku-multi/views/layout"
+)
+
+templ Index(sessions []*model.SessionWithParticipants, statusFilter string) {
+	@layout.AdminBase("セッション履歴", "sessions") {
+		<div class="page-header">
+			<h1 class="page-title">セッション履歴</h1>
+			<a href="/admin/sessions/new" class="btn btn-primary">＋ 手動登録</a>
+		</div>
+
+		<div class="filter-bar">
+			<a href="/admin/sessions" class={ filterBtnClass(statusFilter == "") }>すべて</a>
+			<a href="/admin/sessions?status=confirmed" class={ filterBtnClass(statusFilter == "confirmed") }>確定済</a>
+			<a href="/admin/sessions?status=done" class={ filterBtnClass(statusFilter == "done") }>実施済</a>
+			<a href="/admin/sessions?status=cancelled" class={ filterBtnClass(statusFilter == "cancelled") }>キャンセル</a>
+		</div>
+
+		<div class="table-wrap">
+			<table>
+				<thead>
+					<tr>
+						<th>日時</th>
+						<th>種別</th>
+						<th>参加者</th>
+						<th>ステータス</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					if len(sessions) == 0 {
+						<tr>
+							<td colspan="5" class="text-muted text-center" style="padding: var(--space-lg);">
+								セッション履歴がありません
+							</td>
+						</tr>
+					}
+					for _, s := range sessions {
+						<tr id={ "session-row-" + s.ID.String() }>
+							<td>{ s.SessionDate.Format("2006/01/02") } { s.SessionTime.Format("15:04") }</td>
+							<td>
+								if s.SessionType == "solo" {
+									<span class="badge badge-solo">ソロ</span>
+								} else {
+									<span class="badge badge-group">グループ</span>
+								}
+							</td>
+							<td>{ participantHandles(s.Participants) }</td>
+							<td>{ sessionStatusBadge(s.Status) }</td>
+							<td>
+								<div class="flex gap-sm">
+									<a href={ templ.SafeURL(fmt.Sprintf("/admin/sessions/%s/edit", s.ID.String())) } class="btn btn-secondary btn-sm">編集</a>
+									<button
+										class="btn btn-danger btn-sm"
+										hx-delete={ fmt.Sprintf("/admin/sessions/%s", s.ID.String()) }
+										hx-target={ "#session-row-" + s.ID.String() }
+										hx-swap="outerHTML"
+										hx-confirm="このセッション履歴を削除しますか？"
+									>削除</button>
+								</div>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	}
+}
+
+templ New(applicants []*model.ApplicantWithCount, errMsg string) {
+	@layout.AdminBase("セッション手動登録", "sessions") {
+		<div class="page-header">
+			<h1 class="page-title">セッション手動登録</h1>
+			<a href="/admin/sessions" class="btn btn-secondary">← 一覧に戻る</a>
+		</div>
+		<div class="card" style="max-width: 560px;">
+			if errMsg != "" {
+				<div class="alert alert-error">{ errMsg }</div>
+			}
+			<form method="POST" action="/admin/sessions">
+				<div class="form-group">
+					<label class="form-label">種別 <span style="color:var(--color-danger)">*</span></label>
+					<select class="form-control" name="session_type" required
+						hx-get="/admin/sessions/participant-select"
+						hx-target="#participant-select"
+						hx-trigger="change"
+						hx-include="[name='session_type']"
+					>
+						<option value="solo">ソロ（1名）</option>
+						<option value="group">グループ（2名）</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label class="form-label">日付 <span style="color:var(--color-danger)">*</span></label>
+					<input class="form-control" type="date" name="session_date" required/>
+				</div>
+				<div class="form-group">
+					<label class="form-label">時刻 <span style="color:var(--color-danger)">*</span></label>
+					<input class="form-control" type="time" name="session_time" required/>
+				</div>
+				<div class="form-group">
+					<label class="form-label">ステータス</label>
+					<select class="form-control" name="status">
+						<option value="confirmed">確定済</option>
+						<option value="done">実施済</option>
+						<option value="cancelled">キャンセル</option>
+					</select>
+				</div>
+				<div id="participant-select" class="form-group">
+					@ParticipantSelect(applicants, "solo", nil)
+				</div>
+				<div class="form-group">
+					<label class="form-label">メモ（内部用）</label>
+					<textarea class="form-control" name="notes" rows="3"></textarea>
+				</div>
+				<div class="flex gap-sm mt-md">
+					<button type="submit" class="btn btn-primary">登録する</button>
+					<a href="/admin/sessions" class="btn btn-secondary">キャンセル</a>
+				</div>
+			</form>
+		</div>
+	}
+}
+
+templ Edit(s *model.SessionWithParticipants, applicants []*model.ApplicantWithCount, errMsg string) {
+	@layout.AdminBase("セッション編集", "sessions") {
+		<div class="page-header">
+			<h1 class="page-title">セッション編集</h1>
+			<a href="/admin/sessions" class="btn btn-secondary">← 一覧に戻る</a>
+		</div>
+		<div class="card" style="max-width: 560px;">
+			if errMsg != "" {
+				<div class="alert alert-error">{ errMsg }</div>
+			}
+			<form method="POST" action={ templ.SafeURL(fmt.Sprintf("/admin/sessions/%s/edit", s.ID.String())) }>
+				<input type="hidden" name="_method" value="PUT"/>
+				<div class="form-group">
+					<label class="form-label">種別</label>
+					<select class="form-control" name="session_type"
+						hx-get="/admin/sessions/participant-select"
+						hx-target="#participant-select"
+						hx-trigger="change"
+						hx-include="[name='session_type']"
+					>
+						<option value="solo" selected?={ s.SessionType == "solo" }>ソロ（1名）</option>
+						<option value="group" selected?={ s.SessionType == "group" }>グループ（2名）</option>
+					</select>
+				</div>
+				<div class="form-group">
+					<label class="form-label">日付</label>
+					<input class="form-control" type="date" name="session_date" value={ s.SessionDate.Format("2006-01-02") } required/>
+				</div>
+				<div class="form-group">
+					<label class="form-label">時刻</label>
+					<input class="form-control" type="time" name="session_time" value={ s.SessionTime.Format("15:04") } required/>
+				</div>
+				<div class="form-group">
+					<label class="form-label">ステータス</label>
+					<select class="form-control" name="status">
+						<option value="confirmed" selected?={ s.Status == "confirmed" }>確定済</option>
+						<option value="done" selected?={ s.Status == "done" }>実施済</option>
+						<option value="cancelled" selected?={ s.Status == "cancelled" }>キャンセル</option>
+					</select>
+				</div>
+				<div id="participant-select" class="form-group">
+					@ParticipantSelect(applicants, s.SessionType, s.Participants)
+				</div>
+				<div class="form-group">
+					<label class="form-label">メモ</label>
+					<textarea class="form-control" name="notes" rows="3">{ s.Notes }</textarea>
+				</div>
+				<div class="flex gap-sm mt-md">
+					<button type="submit" class="btn btn-primary">更新する</button>
+					<a href="/admin/sessions" class="btn btn-secondary">キャンセル</a>
+				</div>
+			</form>
+		</div>
+	}
+}
+
+templ ParticipantSelect(applicants []*model.ApplicantWithCount, sessionType string, current []*model.Applicant) {
+	<label class="form-label">
+		参加者
+		if sessionType == "group" {
+			（最大2名選択）
+		} else {
+			（1名選択）
+		}
+	</label>
+	if sessionType == "group" {
+		<div class="checklist">
+			for _, a := range applicants {
+				<label class="checklist-item" style="cursor: pointer;">
+					<input type="checkbox" name="applicant_ids" value={ a.ID.String() } checked?={ isSelected(a.ID.String(), current) }/>
+					<span>{ a.Handle }</span>
+				</label>
+			}
+		</div>
+	} else {
+		<select class="form-control" name="applicant_ids">
+			for _, a := range applicants {
+				<option value={ a.ID.String() } selected?={ isSelected(a.ID.String(), current) }>{ a.Handle }</option>
+			}
+		</select>
+	}
+}
+
+func filterBtnClass(active bool) string {
+	if active {
+		return "btn btn-primary btn-sm"
+	}
+	return "btn btn-secondary btn-sm"
+}
+
+func participantHandles(ps []*model.Applicant) string {
+	handles := ""
+	for i, p := range ps {
+		if i > 0 {
+			handles += "、"
+		}
+		handles += p.Handle
+	}
+	return handles
+}
+
+func sessionStatusBadge(status string) string {
+	switch status {
+	case "confirmed":
+		return "確定済"
+	case "done":
+		return "実施済"
+	case "cancelled":
+		return "キャンセル"
+	}
+	return status
+}
+
+func isSelected(id string, current []*model.Applicant) bool {
+	for _, a := range current {
+		if a.ID.String() == id {
+			return true
+		}
+	}
+	return false
+}

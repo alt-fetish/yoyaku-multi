@@ -1,0 +1,23 @@
+package admin
+
+import "github.com/ryotaro/yoyaku-multi/views/layout"
+
+templ Login(errMsg string) {
+	@layout.Base("管理者ログイン") {
+		<div class="login-page">
+			<div class="card login-card">
+				<h1 class="login-title">ALT-FETISH 管理</h1>
+				if errMsg != "" {
+					<div class="alert alert-error">{ errMsg }</div>
+				}
+				<form method="POST" action="/admin/login">
+					<div class="form-group">
+						<label class="form-label" for="password">パスワード</label>
+						<input class="form-control" type="password" id="password" name="password" required autofocus/>
+					</div>
+					<button type="submit" class="btn btn-primary w-full mt-md">ログイン</button>
+				</form>
+			</div>
+		</div>
+	}
+}

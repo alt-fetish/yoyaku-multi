@@ -1,0 +1,132 @@
+package my
+
+import (
+	"fmt"
+	"github.com/ryotaro/yoyaku-multi/internal/model"
+	"github.com/ryotaro/yoyaku-multi/views/layout"
+)
+
+templ Index(applicant *model.Applicant, entries []*model.EntryWithEvent, ngSettings []*model.NGSetting, messages []*model.ChatMessage) {
+	@layout.Base("マイページ") {
+		<div class="container">
+			<div class="page-header">
+				<h1 class="page-title">{ applicant.Handle } さんのマイページ</h1>
+				<a href={ templ.SafeURL("/events?token=" + applicant.Token) } class="btn btn-primary">開催日一覧・参加申込</a>
+			</div>
+
+			<!-- 参加表明一覧 -->
+			<section class="mypage-section">
+				<h2 class="mypage-section-title">参加表明一覧</h2>
+				if len(entries) == 0 {
+					<p class="text-muted">まだ参加表明がありません。<a href={ templ.SafeURL("/events?token=" + applicant.Token) }>開催日一覧</a>からご表明ください。</p>
+				} else {
+					<div class="table-wrap">
+						<table>
+							<thead>
+								<tr>
+									<th>日時</th>
+									<th>種別</th>
+									<th>ステータス</th>
+								</tr>
+							</thead>
+							<tbody>
+								for _, e := range entries {
+									<tr>
+										<td>
+											{ e.Event.EventDate.Format("2006年1月2日") } { e.Event.EventTime.Format("15:04") }〜
+										</td>
+										<td>
+											if e.Event.SessionType == "solo" {
+												<span class="badge badge-solo">ソロ</span>
+											} else {
+												<span class="badge badge-group">グループ</span>
+											}
+										</td>
+										<td>{ statusLabel(e.Status) }</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				}
+			</section>
+
+			<!-- NG設定確認 -->
+			<section class="mypage-section">
+				<h2 class="mypage-section-title">NG行為設定</h2>
+				<div class="ng-grid">
+					for _, key := range model.NGActionKeys {
+						<div class="ng-grid-item">
+							<span>{ model.NGActionLabels[key] }</span>
+							if isOK(ngSettings, key) {
+								<span class="badge badge-ok">OK</span>
+							} else {
+								<span class="badge badge-ng">NG</span>
+							}
+						</div>
+					}
+				</div>
+			</section>
+
+			<!-- チャット -->
+			<section class="mypage-section">
+				<h2 class="mypage-section-title">管理者とのチャット</h2>
+				<div
+					class="chat-container"
+					id="chat-messages"
+					hx-get={ "/my/" + applicant.Token + "/chat/messages" }
+					hx-trigger="every 10s"
+					hx-swap="innerHTML"
+				>
+					@ChatMessages(messages)
+				</div>
+				<form
+					class="chat-form"
+					hx-post={ "/my/" + applicant.Token + "/chat" }
+					hx-target="#chat-messages"
+					hx-swap="innerHTML"
+					hx-on::after-request="this.reset()"
+				>
+					<input class="form-control" type="text" name="body" placeholder="メッセージを入力..." required autocomplete="off"/>
+					<button type="submit" class="btn btn-primary">送信</button>
+				</form>
+			</section>
+		</div>
+	}
+}
+
+templ ChatMessages(messages []*model.ChatMessage) {
+	for _, msg := range messages {
+		<div>
+			<div class={ fmt.Sprintf("chat-bubble chat-bubble--%s", msg.Sender) }>
+				{ msg.Body }
+			</div>
+			<div class={ fmt.Sprintf("chat-meta chat-meta--%s", msg.Sender) }>
+				{ msg.CreatedAt.Format("1/2 15:04") }
+			</div>
+		</div>
+	}
+}
+
+func statusLabel(s string) string {
+	switch s {
+	case "pending":
+		return "表明中"
+	case "confirmed":
+		return "参加確定"
+	case "declined":
+		return "今回は見送り"
+	case "cancelled":
+		return "取消済み"
+	}
+	return s
+}
+
+func isOK(settings []*model.NGSetting, key string) bool {
+	for _, s := range settings {
+		if s.ActionKey == key {
+			return s.IsOK
+		}
+	}
+	return false
+}
