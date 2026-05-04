@@ -25,7 +25,7 @@ templ Index(applicant *model.Applicant, entries []*model.EntryWithEvent, ngSetti
 							<thead>
 								<tr>
 									<th>日時</th>
-									<th>種別</th>
+									<th>定員</th>
 									<th>ステータス</th>
 								</tr>
 							</thead>
@@ -36,11 +36,7 @@ templ Index(applicant *model.Applicant, entries []*model.EntryWithEvent, ngSetti
 											{ e.Event.EventDate.Format("2006年1月2日") } { e.Event.EventTime.Format("15:04") }〜
 										</td>
 										<td>
-											if e.Event.SessionType == "solo" {
-												<span class="badge badge-solo">ソロ</span>
-											} else {
-												<span class="badge badge-group">グループ</span>
-											}
+											<span class="badge badge-open">{ fmt.Sprintf("%d名", e.Event.Capacity) }</span>
 										</td>
 										<td>{ statusLabel(e.Status) }</td>
 									</tr>

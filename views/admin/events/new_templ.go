@@ -66,7 +66,7 @@ func New(errMsg string) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<form method=\"POST\" action=\"/admin/events\"><div class=\"form-group\"><label class=\"form-label\" for=\"event_date\">日付 <span style=\"color:var(--color-danger)\">*</span></label> <input class=\"form-control\" type=\"date\" id=\"event_date\" name=\"event_date\" required></div><div class=\"form-group\"><label class=\"form-label\" for=\"event_time\">開始時刻 <span style=\"color:var(--color-danger)\">*</span></label> <input class=\"form-control\" type=\"time\" id=\"event_time\" name=\"event_time\" required></div><div class=\"form-group\"><label class=\"form-label\" for=\"end_time\">終了時刻（任意）</label> <input class=\"form-control\" type=\"time\" id=\"end_time\" name=\"end_time\"></div><div class=\"form-group\"><label class=\"form-label\" for=\"session_type\">種別 <span style=\"color:var(--color-danger)\">*</span></label> <select class=\"form-control\" id=\"session_type\" name=\"session_type\" required><option value=\"solo\">ソロ（1名）</option> <option value=\"group\">グループ（2名）</option></select></div><div class=\"form-group\"><label class=\"form-label\" for=\"notes\">メモ（内部用・非公開）</label> <textarea class=\"form-control\" id=\"notes\" name=\"notes\" rows=\"3\" placeholder=\"場所・備考など\"></textarea></div><div class=\"form-group\"><label style=\"display: flex; align-items: center; gap: var(--space-sm); cursor: pointer;\"><input type=\"checkbox\" name=\"send_notification\" value=\"1\"> <span>登録後、参加者全員に通知メールを送信する</span></label></div><div class=\"flex gap-sm mt-md\"><button type=\"submit\" class=\"btn btn-primary\">登録する</button> <a href=\"/admin/events\" class=\"btn btn-secondary\">キャンセル</a></div></form></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<form method=\"POST\" action=\"/admin/events\"><div class=\"form-group\"><label class=\"form-label\" for=\"event_date\">日付 <span style=\"color:var(--color-danger)\">*</span></label> <input class=\"form-control\" type=\"date\" id=\"event_date\" name=\"event_date\" required></div><div class=\"form-group\"><label class=\"form-label\" for=\"event_time\">開始時刻 <span style=\"color:var(--color-danger)\">*</span></label> <input class=\"form-control\" type=\"time\" id=\"event_time\" name=\"event_time\" required></div><div class=\"form-group\"><label class=\"form-label\" for=\"end_time\">終了時刻（任意）</label> <input class=\"form-control\" type=\"time\" id=\"end_time\" name=\"end_time\"></div><div class=\"form-group\"><label class=\"form-label\" for=\"capacity\">定員 <span style=\"color:var(--color-danger)\">*</span></label> <input class=\"form-control\" type=\"number\" id=\"capacity\" name=\"capacity\" min=\"1\" step=\"1\" value=\"2\" required></div><div class=\"form-group\"><label class=\"form-label\" for=\"notes\">メモ（内部用・非公開）</label> <textarea class=\"form-control\" id=\"notes\" name=\"notes\" rows=\"3\" placeholder=\"場所・備考など\"></textarea></div><div class=\"form-group\"><label style=\"display: flex; align-items: center; gap: var(--space-sm); cursor: pointer;\"><input type=\"checkbox\" name=\"send_notification\" value=\"1\"> <span>登録後、参加者全員に通知メールを送信する</span></label></div><div class=\"flex gap-sm mt-md\"><button type=\"submit\" class=\"btn btn-primary\">登録する</button> <a href=\"/admin/events\" class=\"btn btn-secondary\">キャンセル</a></div></form></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -125,7 +125,7 @@ func Edit(e *EventFormData, errMsg string) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(errMsg)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/new.templ`, Line: 62, Col: 43}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/new.templ`, Line: 59, Col: 43}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -143,7 +143,7 @@ func Edit(e *EventFormData, errMsg string) templ.Component {
 			var templ_7745c5c3_Var7 templ.SafeURL
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("/admin/events/" + e.ID + "/edit"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/new.templ`, Line: 64, Col: 80}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/new.templ`, Line: 61, Col: 80}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
@@ -156,7 +156,7 @@ func Edit(e *EventFormData, errMsg string) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(e.EventDate)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/new.templ`, Line: 68, Col: 98}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/new.templ`, Line: 65, Col: 98}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -169,7 +169,7 @@ func Edit(e *EventFormData, errMsg string) templ.Component {
 			var templ_7745c5c3_Var9 string
 			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(e.EventTime)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/new.templ`, Line: 72, Col: 98}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/new.templ`, Line: 69, Col: 98}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 			if templ_7745c5c3_Err != nil {
@@ -182,46 +182,39 @@ func Edit(e *EventFormData, errMsg string) templ.Component {
 			var templ_7745c5c3_Var10 string
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(e.EndTime)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/new.templ`, Line: 76, Col: 92}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/new.templ`, Line: 73, Col: 92}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\"></div><div class=\"form-group\"><label class=\"form-label\" for=\"session_type\">種別</label> <select class=\"form-control\" id=\"session_type\" name=\"session_type\"><option value=\"solo\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if e.SessionType == "solo" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " selected")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, ">ソロ（1名）</option> <option value=\"group\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			if e.SessionType == "group" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, " selected")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, ">グループ（2名）</option></select></div><div class=\"form-group\"><label class=\"form-label\" for=\"notes\">メモ</label> <textarea class=\"form-control\" id=\"notes\" name=\"notes\" rows=\"3\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\"></div><div class=\"form-group\"><label class=\"form-label\" for=\"capacity\">定員</label> <input class=\"form-control\" type=\"number\" id=\"capacity\" name=\"capacity\" min=\"1\" step=\"1\" value=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var11 string
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(e.Notes)
+			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(e.Capacity)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/new.templ`, Line: 87, Col: 78}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/new.templ`, Line: 77, Col: 112}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</textarea></div><div class=\"flex gap-sm mt-md\"><button type=\"submit\" class=\"btn btn-primary\">更新する</button> <a href=\"/admin/events\" class=\"btn btn-secondary\">キャンセル</a></div></form></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" required></div><div class=\"form-group\"><label class=\"form-label\" for=\"notes\">メモ</label> <textarea class=\"form-control\" id=\"notes\" name=\"notes\" rows=\"3\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			var templ_7745c5c3_Var12 string
+			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(e.Notes)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/new.templ`, Line: 81, Col: 78}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</textarea></div><div class=\"flex gap-sm mt-md\"><button type=\"submit\" class=\"btn btn-primary\">更新する</button> <a href=\"/admin/events\" class=\"btn btn-secondary\">キャンセル</a></div></form></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -237,12 +230,12 @@ func Edit(e *EventFormData, errMsg string) templ.Component {
 
 // EventFormData はフォーム表示用のデータ構造
 type EventFormData struct {
-	ID          string
-	SessionType string
-	EventDate   string
-	EventTime   string
-	EndTime     string
-	Notes       string
+	ID        string
+	EventDate string
+	EventTime string
+	EndTime   string
+	Capacity  string
+	Notes     string
 }
 
 var _ = templruntime.GeneratedTemplate

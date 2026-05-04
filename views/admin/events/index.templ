@@ -29,7 +29,7 @@ templ Index(events []*model.EventWithCount, statusFilter string) {
 				<thead>
 					<tr>
 						<th>日時</th>
-						<th>種別</th>
+						<th>定員</th>
 						<th>参加表明</th>
 						<th>ステータス</th>
 						<th>操作</th>
@@ -52,15 +52,11 @@ templ Index(events []*model.EventWithCount, statusFilter string) {
 								}
 							</td>
 							<td>
-								if e.SessionType == "solo" {
-									<span class="badge badge-solo">ソロ</span>
-								} else {
-									<span class="badge badge-group">グループ</span>
-								}
+								<span class="badge badge-open">{ fmt.Sprintf("%d名", e.Capacity) }</span>
 							</td>
 							<td>
 								<a href={ templ.SafeURL(fmt.Sprintf("/admin/events/%s/entries", e.ID.String())) }>
-									{ fmt.Sprintf("%d名", e.EntryCount) }
+									{ fmt.Sprintf("%d / %d名", e.EntryCount, e.Capacity) }
 								</a>
 							</td>
 							<td>{ statusBadge(e.Status) }</td>

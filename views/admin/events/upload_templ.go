@@ -70,7 +70,7 @@ func Upload(errMsg string) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"alert alert-info mb-md\"><strong>CSVフォーマット</strong><br>ヘッダー行: <code>date,starttime,endtime,type</code><br>例: <code>2026-04-01,14:00,17:00,solo</code><br>type は <code>solo</code> または <code>group</code></div><form hx-post=\"/admin/events/upload/preview\" hx-target=\"#preview-area\" hx-swap=\"innerHTML\" hx-encoding=\"multipart/form-data\"><div class=\"form-group\"><label class=\"form-label\">CSVファイル</label> <input class=\"form-control\" type=\"file\" name=\"csv_file\" accept=\".csv\" required></div><button type=\"submit\" class=\"btn btn-primary\">プレビューを確認する</button></form><div id=\"preview-area\" class=\"mt-lg\"></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"alert alert-info mb-md\"><strong>CSVフォーマット</strong><br>ヘッダー行: <code>date,starttime,endtime,capacity</code><br>例: <code>2026-04-01,14:00,15:00,3</code><br>capacity は1以上の整数</div><form hx-post=\"/admin/events/upload/preview\" hx-target=\"#preview-area\" hx-swap=\"innerHTML\" hx-encoding=\"multipart/form-data\"><div class=\"form-group\"><label class=\"form-label\">CSVファイル</label> <input class=\"form-control\" type=\"file\" name=\"csv_file\" accept=\".csv\" required></div><button type=\"submit\" class=\"btn btn-primary\">プレビューを確認する</button></form><div id=\"preview-area\" class=\"mt-lg\"></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -196,7 +196,7 @@ func UploadPreview(rows []model.EventRow, parseErrors []model.BulkRowResult, err
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, " <div class=\"table-wrap mb-md\"><table><thead><tr><th>日付</th><th>開始</th><th>終了</th><th>種別</th></tr></thead> <tbody>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, " <div class=\"table-wrap mb-md\"><table><thead><tr><th>日付</th><th>開始</th><th>終了</th><th>定員</th></tr></thead> <tbody>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -245,9 +245,9 @@ func UploadPreview(rows []model.EventRow, parseErrors []model.BulkRowResult, err
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var13 string
-				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(row.Type)
+				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(row.Capacity)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/upload.templ`, Line: 71, Col: 21}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/upload.templ`, Line: 71, Col: 25}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
@@ -346,9 +346,9 @@ func UploadPreview(rows []model.EventRow, parseErrors []model.BulkRowResult, err
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var20 string
-				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("rows[%d][type]", i))
+				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("rows[%d][capacity]", i))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/upload.templ`, Line: 82, Col: 64}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/upload.templ`, Line: 82, Col: 68}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 				if templ_7745c5c3_Err != nil {
@@ -359,9 +359,9 @@ func UploadPreview(rows []model.EventRow, parseErrors []model.BulkRowResult, err
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var21 string
-				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(row.Type)
+				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(row.Capacity)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/upload.templ`, Line: 82, Col: 83}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/upload.templ`, Line: 82, Col: 91}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 				if templ_7745c5c3_Err != nil {

@@ -26,11 +26,8 @@ templ New(errMsg string) {
 					<input class="form-control" type="time" id="end_time" name="end_time"/>
 				</div>
 				<div class="form-group">
-					<label class="form-label" for="session_type">種別 <span style="color:var(--color-danger)">*</span></label>
-					<select class="form-control" id="session_type" name="session_type" required>
-						<option value="solo">ソロ（1名）</option>
-						<option value="group">グループ（2名）</option>
-					</select>
+					<label class="form-label" for="capacity">定員 <span style="color:var(--color-danger)">*</span></label>
+					<input class="form-control" type="number" id="capacity" name="capacity" min="1" step="1" value="2" required/>
 				</div>
 				<div class="form-group">
 					<label class="form-label" for="notes">メモ（内部用・非公開）</label>
@@ -76,11 +73,8 @@ templ Edit(e *EventFormData, errMsg string) {
 					<input class="form-control" type="time" id="end_time" name="end_time" value={ e.EndTime }/>
 				</div>
 				<div class="form-group">
-					<label class="form-label" for="session_type">種別</label>
-					<select class="form-control" id="session_type" name="session_type">
-						<option value="solo" selected?={ e.SessionType == "solo" }>ソロ（1名）</option>
-						<option value="group" selected?={ e.SessionType == "group" }>グループ（2名）</option>
-					</select>
+					<label class="form-label" for="capacity">定員</label>
+					<input class="form-control" type="number" id="capacity" name="capacity" min="1" step="1" value={ e.Capacity } required/>
 				</div>
 				<div class="form-group">
 					<label class="form-label" for="notes">メモ</label>
@@ -97,10 +91,10 @@ templ Edit(e *EventFormData, errMsg string) {
 
 // EventFormData はフォーム表示用のデータ構造
 type EventFormData struct {
-	ID          string
-	SessionType string
-	EventDate   string
-	EventTime   string
-	EndTime     string
-	Notes       string
+	ID        string
+	EventDate string
+	EventTime string
+	EndTime   string
+	Capacity  string
+	Notes     string
 }

@@ -125,7 +125,7 @@ templ Show(a *model.Applicant, ngSettings []*model.NGSetting, entries []*model.E
 						<thead>
 							<tr>
 								<th>日時</th>
-								<th>種別</th>
+								<th>定員</th>
 								<th>ステータス</th>
 							</tr>
 						</thead>
@@ -134,11 +134,7 @@ templ Show(a *model.Applicant, ngSettings []*model.NGSetting, entries []*model.E
 								<tr>
 									<td>{ e.Event.EventDate.Format("2006/01/02") } { e.Event.EventTime.Format("15:04") }</td>
 									<td>
-										if e.Event.SessionType == "solo" {
-											<span class="badge badge-solo">ソロ</span>
-										} else {
-											<span class="badge badge-group">グループ</span>
-										}
+										<span class="badge badge-open">{ fmt.Sprintf("%d名", e.Event.Capacity) }</span>
 									</td>
 									<td>{ entryStatusLabel(e.Status) }</td>
 								</tr>

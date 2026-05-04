@@ -54,16 +54,17 @@ func (h *AdminEventsHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sessionType := r.FormValue("session_type")
-	if sessionType != "solo" && sessionType != "group" {
-		admin_events.New("種別はsoloまたはgroupを選択してください").Render(r.Context(), w)
+	capacity := strconvInt(r.FormValue("capacity"))
+	if capacity <= 0 {
+		admin_events.New("定員は1以上の整数で入力してください").Render(r.Context(), w)
 		return
 	}
 
 	e := &model.Event{
-		SessionType: sessionType,
+		SessionType: "group",
 		EventDate:   eventDate,
 		EventTime:   eventTime,
+		Capacity:    capacity,
 		Notes:       r.FormValue("notes"),
 	}
 
@@ -75,7 +76,7 @@ func (h *AdminEventsHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.Events.CreateEvent(e); err != nil {
-		admin_events.New("登録に失敗しました: " + err.Error()).Render(r.Context(), w)
+		admin_events.New("登録に失敗しました: "+err.Error()).Render(r.Context(), w)
 		return
 	}
 
@@ -87,7 +88,7 @@ func (h *AdminEventsHandler) Create(w http.ResponseWriter, r *http.Request) {
 			body := mail.NewEventEmail(
 				eventDate.Format("2006年1月2日"),
 				eventTime.Format("15:04"),
-				sessionType,
+				capacity,
 				eventsURL,
 			)
 			_ = h.Mailer.SendBulk(emails, "【ALT-FETISH】新しい開催日のお知らせ", body)
@@ -116,12 +117,12 @@ func (h *AdminEventsHandler) ShowEdit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	formData := &admin_events.EventFormData{
-		ID:          e.ID.String(),
-		SessionType: e.SessionType,
-		EventDate:   e.EventDate.Format("2006-01-02"),
-		EventTime:   e.EventTime.Format("15:04"),
-		EndTime:     endTimeStr,
-		Notes:       e.Notes,
+		ID:        e.ID.String(),
+		EventDate: e.EventDate.Format("2006-01-02"),
+		EventTime: e.EventTime.Format("15:04"),
+		EndTime:   endTimeStr,
+		Capacity:  strconv.Itoa(e.Capacity),
+		Notes:     e.Notes,
 	}
 
 	admin_events.Edit(formData, "").Render(r.Context(), w)
@@ -161,9 +162,16 @@ func (h *AdminEventsHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	e.SessionType = r.FormValue("session_type")
+	capacity := strconvInt(r.FormValue("capacity"))
+	if capacity <= 0 {
+		http.Error(w, "定員は1以上の整数で入力してください", http.StatusBadRequest)
+		return
+	}
+
+	e.SessionType = "group"
 	e.EventDate = eventDate
 	e.EventTime = eventTime
+	e.Capacity = capacity
 	e.Notes = r.FormValue("notes")
 
 	if endTimeStr := r.FormValue("end_time"); endTimeStr != "" {
@@ -306,6 +314,10 @@ func (h *AdminEventsHandler) Confirm(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "開催日が見つかりません", http.StatusNotFound)
 		return
 	}
+	if len(applicantIDs) > event.Capacity {
+		http.Error(w, fmt.Sprintf("選択人数が定員を超えています（定員%d名）", event.Capacity), http.StatusBadRequest)
+		return
+	}
 
 	_, err = model.ConfirmEntries(h.Events.DB, eventID, applicantIDs)
 	if err != nil {
@@ -323,7 +335,7 @@ func (h *AdminEventsHandler) Confirm(w http.ResponseWriter, r *http.Request) {
 			applicant.Handle,
 			event.EventDate.Format("2006年1月2日"),
 			event.EventTime.Format("15:04"),
-			event.SessionType,
+			event.Capacity,
 		)
 		_ = h.Mailer.Send(applicant.Email, "【ALT-FETISH】参加確定のお知らせ", body)
 	}
@@ -415,7 +427,7 @@ func (h *AdminEventsHandler) ConfirmCSV(w http.ResponseWriter, r *http.Request) 
 			Date:      date,
 			StartTime: r.FormValue(fmt.Sprintf("rows[%d][starttime]", i)),
 			EndTime:   r.FormValue(fmt.Sprintf("rows[%d][endtime]", i)),
-			Type:      r.FormValue(fmt.Sprintf("rows[%d][type]", i)),
+			Capacity:  r.FormValue(fmt.Sprintf("rows[%d][capacity]", i)),
 		})
 	}
 

@@ -39,13 +39,9 @@ templ EventCard(e *model.EventWithCount, applicantToken string, hasEntry bool) {
 				{ e.EventDate.Format("2006年1月2日（Mon）") } { e.EventTime.Format("15:04") }〜
 			</div>
 			<div class="event-meta">
-				if e.SessionType == "solo" {
-					<span class="badge badge-solo">ソロ</span>
-				} else {
-					<span class="badge badge-group">グループ</span>
-				}
+				<span class="badge badge-open">{ fmt.Sprintf("定員%d名", e.Capacity) }</span>
 				<span class="event-slots text-muted">
-					{ fmt.Sprintf("残枠 %s", slotsText(e.SessionType, e.EntryCount)) }
+					{ slotsText(e.Capacity, e.EntryCount) }
 				</span>
 			</div>
 		</div>
@@ -62,6 +58,8 @@ templ EventCard(e *model.EventWithCount, applicantToken string, hasEntry bool) {
 				>
 					✓ 参加表明済み（取消）
 				</button>
+			} else if isSoldOut(e.Capacity, e.EntryCount) {
+				<button class="btn btn-secondary" disabled>SOLD OUT</button>
 			} else {
 				<button
 					class="btn btn-primary"
@@ -76,14 +74,17 @@ templ EventCard(e *model.EventWithCount, applicantToken string, hasEntry bool) {
 	</div>
 }
 
-func slotsText(sessionType string, entryCount int) string {
-	capacity := 1
-	if sessionType == "group" {
-		capacity = 2
-	}
+func slotsText(capacity, entryCount int) string {
 	remaining := capacity - entryCount
 	if remaining < 0 {
 		remaining = 0
 	}
-	return fmt.Sprintf("%d / %d", remaining, capacity)
+	if remaining == 0 {
+		return "SOLD OUT"
+	}
+	return fmt.Sprintf("残枠 %d / %d", remaining, capacity)
+}
+
+func isSoldOut(capacity, entryCount int) bool {
+	return capacity-entryCount <= 0
 }

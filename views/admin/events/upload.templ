@@ -18,9 +18,9 @@ templ Upload(errMsg string) {
 			}
 			<div class="alert alert-info mb-md">
 				<strong>CSVフォーマット</strong><br/>
-				ヘッダー行: <code>date,starttime,endtime,type</code><br/>
-				例: <code>2026-04-01,14:00,17:00,solo</code><br/>
-				type は <code>solo</code> または <code>group</code>
+				ヘッダー行: <code>date,starttime,endtime,capacity</code><br/>
+				例: <code>2026-04-01,14:00,15:00,3</code><br/>
+				capacity は1以上の整数
 			</div>
 			<form
 				hx-post="/admin/events/upload/preview"
@@ -59,7 +59,7 @@ templ UploadPreview(rows []model.EventRow, parseErrors []model.BulkRowResult, er
 						<th>日付</th>
 						<th>開始</th>
 						<th>終了</th>
-						<th>種別</th>
+						<th>定員</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -68,7 +68,7 @@ templ UploadPreview(rows []model.EventRow, parseErrors []model.BulkRowResult, er
 							<td>{ row.Date }</td>
 							<td>{ row.StartTime }</td>
 							<td>{ row.EndTime }</td>
-							<td>{ row.Type }</td>
+							<td>{ row.Capacity }</td>
 						</tr>
 					}
 				</tbody>
@@ -79,7 +79,7 @@ templ UploadPreview(rows []model.EventRow, parseErrors []model.BulkRowResult, er
 				<input type="hidden" name={ fmt.Sprintf("rows[%d][date]", i) } value={ row.Date }/>
 				<input type="hidden" name={ fmt.Sprintf("rows[%d][starttime]", i) } value={ row.StartTime }/>
 				<input type="hidden" name={ fmt.Sprintf("rows[%d][endtime]", i) } value={ row.EndTime }/>
-				<input type="hidden" name={ fmt.Sprintf("rows[%d][type]", i) } value={ row.Type }/>
+				<input type="hidden" name={ fmt.Sprintf("rows[%d][capacity]", i) } value={ row.Capacity }/>
 			}
 			<button type="submit" class="btn btn-primary" onclick="return confirm('この内容でDBに登録しますか？')">
 				この内容で登録する

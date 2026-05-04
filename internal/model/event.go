@@ -5,6 +5,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"time"
 
@@ -19,6 +20,7 @@ type Event struct {
 	EventDate   time.Time
 	EventTime   time.Time
 	EndTime     *time.Time
+	Capacity    int
 	Status      string
 	Notes       string
 	CreatedAt   time.Time
@@ -57,7 +59,7 @@ type EventRow struct {
 	Date      string
 	StartTime string
 	EndTime   string
-	Type      string
+	Capacity  string
 }
 
 // BulkResult はCSV一括登録の結果
@@ -83,10 +85,10 @@ func (r *PostgresEventRepo) GetEvent(id uuid.UUID) (*Event, error) {
 	ctx := context.Background()
 	e := &Event{}
 	err := r.DB.QueryRow(ctx,
-		`SELECT id, session_type, event_date, event_time, end_time, status, COALESCE(notes,''), created_at
+		`SELECT id, session_type, event_date, event_time, end_time, capacity, status, COALESCE(notes,''), created_at
 		 FROM events WHERE id = $1`,
 		id,
-	).Scan(&e.ID, &e.SessionType, &e.EventDate, &e.EventTime, &e.EndTime, &e.Status, &e.Notes, &e.CreatedAt)
+	).Scan(&e.ID, &e.SessionType, &e.EventDate, &e.EventTime, &e.EndTime, &e.Capacity, &e.Status, &e.Notes, &e.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -96,11 +98,11 @@ func (r *PostgresEventRepo) GetEvent(id uuid.UUID) (*Event, error) {
 func (r *PostgresEventRepo) ListEvents(status string) ([]*EventWithCount, error) {
 	ctx := context.Background()
 
-	query := `SELECT e.id, e.session_type, e.event_date, e.event_time, e.end_time, e.status,
+	query := `SELECT e.id, e.session_type, e.event_date, e.event_time, e.end_time, e.capacity, e.status,
 	                 COALESCE(e.notes,''), e.created_at,
 	                 COUNT(ee.id) AS entry_count
 	          FROM events e
-	          LEFT JOIN event_entries ee ON ee.event_id = e.id AND ee.status != 'cancelled'
+	          LEFT JOIN event_entries ee ON ee.event_id = e.id AND ee.status IN ('pending', 'confirmed')
 	          %s
 	          GROUP BY e.id
 	          ORDER BY e.event_date DESC, e.event_time DESC`
@@ -133,11 +135,11 @@ func (r *PostgresEventRepo) ListEvents(status string) ([]*EventWithCount, error)
 func (r *PostgresEventRepo) ListPublicEvents() ([]*EventWithCount, error) {
 	ctx := context.Background()
 	rows, err := r.DB.Query(ctx,
-		`SELECT e.id, e.session_type, e.event_date, e.event_time, e.end_time, e.status,
+		`SELECT e.id, e.session_type, e.event_date, e.event_time, e.end_time, e.capacity, e.status,
 		        COALESCE(e.notes,''), e.created_at,
 		        COUNT(ee.id) AS entry_count
 		 FROM events e
-		 LEFT JOIN event_entries ee ON ee.event_id = e.id AND ee.status != 'cancelled'
+		 LEFT JOIN event_entries ee ON ee.event_id = e.id AND ee.status IN ('pending', 'confirmed')
 		 WHERE e.status = 'open' AND e.event_date >= CURRENT_DATE
 		 GROUP BY e.id
 		 ORDER BY e.event_date ASC, e.event_time ASC`,
@@ -162,7 +164,7 @@ func scanEventRows(rows pgRows) ([]*EventWithCount, error) {
 		ew := &EventWithCount{}
 		err := rows.Scan(
 			&ew.ID, &ew.SessionType, &ew.EventDate, &ew.EventTime,
-			&ew.EndTime, &ew.Status, &ew.Notes, &ew.CreatedAt,
+			&ew.EndTime, &ew.Capacity, &ew.Status, &ew.Notes, &ew.CreatedAt,
 			&ew.EntryCount,
 		)
 		if err != nil {
@@ -175,24 +177,41 @@ func scanEventRows(rows pgRows) ([]*EventWithCount, error) {
 
 func (r *PostgresEventRepo) CreateEvent(e *Event) error {
 	ctx := context.Background()
+	if e.SessionType == "" {
+		e.SessionType = "group"
+	}
+	if e.Capacity <= 0 {
+		e.Capacity = 2
+	}
 	return r.DB.QueryRow(ctx,
-		`INSERT INTO events (session_type, event_date, event_time, end_time, status, notes)
-		 VALUES ($1, $2, $3, $4, 'open', $5)
+		`INSERT INTO events (session_type, event_date, event_time, end_time, capacity, status, notes)
+		 VALUES ($1, $2, $3, $4, $5, 'open', $6)
 		 RETURNING id, created_at`,
 		e.SessionType, e.EventDate.Format("2006-01-02"),
-		e.EventTime.Format("15:04"), e.EndTime, e.Notes,
+		e.EventTime.Format("15:04"), e.EndTime, e.Capacity, e.Notes,
 	).Scan(&e.ID, &e.CreatedAt)
 }
 
 func (r *PostgresEventRepo) UpdateEvent(e *Event) error {
 	ctx := context.Background()
 	_, err := r.DB.Exec(ctx,
-		`UPDATE events SET session_type=$1, event_date=$2, event_time=$3, end_time=$4, notes=$5, status=$6
-		 WHERE id=$7`,
+		`UPDATE events SET session_type=$1, event_date=$2, event_time=$3, end_time=$4, capacity=$5, notes=$6, status=$7
+		 WHERE id=$8`,
 		e.SessionType, e.EventDate.Format("2006-01-02"),
-		e.EventTime.Format("15:04"), e.EndTime, e.Notes, e.Status, e.ID,
+		e.EventTime.Format("15:04"), e.EndTime, e.Capacity, e.Notes, e.Status, e.ID,
 	)
 	return err
+}
+
+func (r *PostgresEventRepo) CountActiveEntries(eventID uuid.UUID) (int, error) {
+	ctx := context.Background()
+	var count int
+	err := r.DB.QueryRow(ctx,
+		`SELECT COUNT(*) FROM event_entries
+		 WHERE event_id=$1 AND status IN ('pending', 'confirmed')`,
+		eventID,
+	).Scan(&count)
+	return count, err
 }
 
 func (r *PostgresEventRepo) DeleteEvent(id uuid.UUID) error {
@@ -259,23 +278,23 @@ func (r *PostgresEventRepo) BulkCreateEvents(rows []EventRow) BulkResult {
 			endTime = &et
 		}
 
-		// typeバリデーション
-		if row.Type != "solo" && row.Type != "group" {
-			result.Errors = append(result.Errors, BulkRowResult{RowNum: rowNum, Row: row, Reason: "typeはsoloかgroupのみ"})
+		capacity, err := parsePositiveInt(row.Capacity)
+		if err != nil {
+			result.Errors = append(result.Errors, BulkRowResult{RowNum: rowNum, Row: row, Reason: "capacityは1以上の整数"})
 			continue
 		}
 
 		// INSERT（重複時はスキップ）
 		var inserted int
 		err = tx.QueryRow(ctx,
-			`INSERT INTO events (session_type, event_date, event_time, end_time, status)
-			 VALUES ($1, $2, $3, $4, 'open')
+			`INSERT INTO events (session_type, event_date, event_time, end_time, capacity, status)
+			 VALUES ('group', $1, $2, $3, $4, 'open')
 			 ON CONFLICT (event_date, event_time) DO NOTHING
 			 RETURNING 1`,
-			row.Type,
 			eventDate.Format("2006-01-02"),
 			startTime.Format("15:04"),
 			endTime,
+			capacity,
 		).Scan(&inserted)
 
 		if err != nil && err.Error() == "no rows in result set" {
@@ -309,10 +328,10 @@ func ParseCSV(r io.Reader) ([]EventRow, []BulkRowResult, error) {
 	if err != nil {
 		return nil, nil, fmt.Errorf("CSVの読み込みに失敗しました")
 	}
-	expectedHeader := []string{"date", "starttime", "endtime", "type"}
+	expectedHeader := []string{"date", "starttime", "endtime", "capacity"}
 	for i, h := range expectedHeader {
 		if i >= len(header) || strings.TrimSpace(strings.ToLower(header[i])) != h {
-			return nil, nil, fmt.Errorf("ヘッダー形式エラー。期待: date,starttime,endtime,type")
+			return nil, nil, fmt.Errorf("ヘッダー形式エラー。期待: date,starttime,endtime,capacity")
 		}
 	}
 
@@ -345,10 +364,18 @@ func ParseCSV(r io.Reader) ([]EventRow, []BulkRowResult, error) {
 			Date:      strings.TrimSpace(record[0]),
 			StartTime: strings.TrimSpace(record[1]),
 			EndTime:   strings.TrimSpace(record[2]),
-			Type:      strings.TrimSpace(record[3]),
+			Capacity:  strings.TrimSpace(record[3]),
 		})
 	}
 	return rows, parseErrors, nil
+}
+
+func parsePositiveInt(s string) (int, error) {
+	n, err := strconv.Atoi(strings.TrimSpace(s))
+	if err != nil || n <= 0 {
+		return 0, fmt.Errorf("invalid positive integer")
+	}
+	return n, nil
 }
 
 // --- event_entries ---
@@ -379,6 +406,48 @@ func (r *PostgresEntryRepo) CreateEntry(entry *EventEntry) error {
 		 RETURNING id, created_at`,
 		entry.EventID, entry.ApplicantID,
 	).Scan(&entry.ID, &entry.CreatedAt)
+}
+
+func (r *PostgresEntryRepo) CreateEntryIfAvailable(entry *EventEntry) (bool, error) {
+	ctx := context.Background()
+	tx, err := r.DB.Begin(ctx)
+	if err != nil {
+		return false, err
+	}
+	defer tx.Rollback(ctx)
+
+	var capacity int
+	if err := tx.QueryRow(ctx,
+		`SELECT capacity FROM events WHERE id=$1 AND status='open' FOR UPDATE`,
+		entry.EventID,
+	).Scan(&capacity); err != nil {
+		return false, err
+	}
+
+	var activeCount int
+	if err := tx.QueryRow(ctx,
+		`SELECT COUNT(*) FROM event_entries
+		 WHERE event_id=$1 AND status IN ('pending', 'confirmed')`,
+		entry.EventID,
+	).Scan(&activeCount); err != nil {
+		return false, err
+	}
+	if activeCount >= capacity {
+		return false, tx.Commit(ctx)
+	}
+
+	if err := tx.QueryRow(ctx,
+		`INSERT INTO event_entries (event_id, applicant_id, status)
+		 VALUES ($1, $2, 'pending')
+		 RETURNING id, created_at`,
+		entry.EventID, entry.ApplicantID,
+	).Scan(&entry.ID, &entry.CreatedAt); err != nil {
+		return false, err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func (r *PostgresEntryRepo) UpdateEntryStatus(id uuid.UUID, status string) error {
@@ -430,7 +499,7 @@ func (r *PostgresEntryRepo) ListEntriesByApplicant(applicantID uuid.UUID) ([]*En
 	ctx := context.Background()
 	rows, err := r.DB.Query(ctx,
 		`SELECT ee.id, ee.event_id, ee.applicant_id, ee.status, ee.created_at,
-		        e.id, e.session_type, e.event_date, e.event_time, e.end_time, e.status, COALESCE(e.notes,''), e.created_at
+		        e.id, e.session_type, e.event_date, e.event_time, e.end_time, e.capacity, e.status, COALESCE(e.notes,''), e.created_at
 		 FROM event_entries ee
 		 JOIN events e ON e.id = ee.event_id
 		 WHERE ee.applicant_id = $1
@@ -448,7 +517,7 @@ func (r *PostgresEntryRepo) ListEntriesByApplicant(applicantID uuid.UUID) ([]*En
 		if err := rows.Scan(
 			&ew.ID, &ew.EventID, &ew.ApplicantID, &ew.Status, &ew.CreatedAt,
 			&ew.Event.ID, &ew.Event.SessionType, &ew.Event.EventDate, &ew.Event.EventTime,
-			&ew.Event.EndTime, &ew.Event.Status, &ew.Event.Notes, &ew.Event.CreatedAt,
+			&ew.Event.EndTime, &ew.Event.Capacity, &ew.Event.Status, &ew.Event.Notes, &ew.Event.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -469,11 +538,14 @@ func ConfirmEntries(db *pgxpool.Pool, eventID uuid.UUID, confirmedApplicantIDs [
 	// イベント取得
 	e := &Event{}
 	err = tx.QueryRow(ctx,
-		`SELECT id, session_type, event_date, event_time FROM events WHERE id=$1`,
+		`SELECT id, session_type, event_date, event_time, capacity FROM events WHERE id=$1`,
 		eventID,
-	).Scan(&e.ID, &e.SessionType, &e.EventDate, &e.EventTime)
+	).Scan(&e.ID, &e.SessionType, &e.EventDate, &e.EventTime, &e.Capacity)
 	if err != nil {
 		return nil, err
+	}
+	if len(confirmedApplicantIDs) > e.Capacity {
+		return nil, fmt.Errorf("選択人数が定員を超えています（定員%d名）", e.Capacity)
 	}
 
 	// 確定参加者のステータスを confirmed に

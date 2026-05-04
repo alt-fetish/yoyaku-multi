@@ -45,6 +45,7 @@ openssl rand -hex 32
 psql "$DATABASE_URL" -f migrations/001_init.sql
 psql "$DATABASE_URL" -f migrations/002_chat.sql
 psql "$DATABASE_URL" -f migrations/003_sessions.sql
+psql "$DATABASE_URL" -f migrations/004_event_capacity.sql
 ```
 
 ---

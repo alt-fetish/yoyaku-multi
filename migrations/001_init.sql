@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS events (
     event_date    DATE NOT NULL,
     event_time    TIME NOT NULL,
     end_time      TIME,
+    capacity      INTEGER NOT NULL DEFAULT 2 CHECK (capacity > 0),
     status        TEXT NOT NULL DEFAULT 'open',
     -- open / confirmed / done / cancelled
     notes         TEXT,

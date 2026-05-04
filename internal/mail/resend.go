@@ -67,11 +67,7 @@ func RegistrationEmail(handle, mypageURL string) string {
 }
 
 // NewEventEmail は新規開催日のお知らせメールHTML本文を生成する
-func NewEventEmail(eventDate, eventTime, sessionType, eventsURL string) string {
-	typeLabel := "ソロ"
-	if sessionType == "group" {
-		typeLabel = "グループ"
-	}
+func NewEventEmail(eventDate, eventTime string, capacity int, eventsURL string) string {
 	return fmt.Sprintf(`<!DOCTYPE html>
 <html lang="ja">
 <head><meta charset="UTF-8"></head>
@@ -81,7 +77,7 @@ func NewEventEmail(eventDate, eventTime, sessionType, eventsURL string) string {
   <p>新しい交流セッションの開催日が登録されました。</p>
   <div style="margin: 24px 0; padding: 16px; background: #222; border-radius: 6px; border: 1px solid #2e2e2e;">
     <p><strong>日時：</strong>%s %s〜</p>
-    <p><strong>種別：</strong>%s</p>
+    <p><strong>定員：</strong>%d名</p>
   </div>
   <p>参加を希望される方は、マイページからご表明ください。</p>
   <div style="margin: 24px 0;">
@@ -91,15 +87,11 @@ func NewEventEmail(eventDate, eventTime, sessionType, eventsURL string) string {
   <p style="color: #888; font-size: 12px;">市川（ALT-FETISH）</p>
 </div>
 </body>
-</html>`, eventDate, eventTime, typeLabel, eventsURL)
+</html>`, eventDate, eventTime, capacity, eventsURL)
 }
 
 // ConfirmationEmail は参加確定通知メールHTML本文を生成する
-func ConfirmationEmail(handle, eventDate, eventTime, sessionType string) string {
-	typeLabel := "ソロ"
-	if sessionType == "group" {
-		typeLabel = "グループ"
-	}
+func ConfirmationEmail(handle, eventDate, eventTime string, capacity int) string {
 	return fmt.Sprintf(`<!DOCTYPE html>
 <html lang="ja">
 <head><meta charset="UTF-8"></head>
@@ -109,14 +101,14 @@ func ConfirmationEmail(handle, eventDate, eventTime, sessionType string) string 
   <p>%s さん、参加が確定しました。</p>
   <div style="margin: 24px 0; padding: 16px; background: #222; border-radius: 6px; border: 1px solid #2e2e2e;">
     <p><strong>日時：</strong>%s %s〜</p>
-    <p><strong>種別：</strong>%s</p>
+    <p><strong>定員：</strong>%d名</p>
   </div>
   <p>詳細は管理者よりご連絡します。当日はお気をつけてお越しください。</p>
   <hr style="border-color: #2e2e2e; margin: 24px 0;">
   <p style="color: #888; font-size: 12px;">市川（ALT-FETISH）</p>
 </div>
 </body>
-</html>`, handle, eventDate, eventTime, typeLabel)
+</html>`, handle, eventDate, eventTime, capacity)
 }
 
 // DeclineEmail は見送り通知メールHTML本文を生成する

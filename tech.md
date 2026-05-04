@@ -88,10 +88,11 @@ CREATE TABLE ng_settings (
 -- 開催日（管理者が先に設定する）
 CREATE TABLE events (
     id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    session_type  TEXT NOT NULL CHECK (session_type IN ('solo', 'group')),
+    session_type  TEXT NOT NULL CHECK (session_type IN ('solo', 'group')), -- 互換用。定員判定には使わない
     event_date    DATE NOT NULL,
     event_time    TIME NOT NULL,
     end_time      TIME,                     -- 終了時刻（CSVのendtimeから登録）
+    capacity      INTEGER NOT NULL DEFAULT 2 CHECK (capacity > 0),
     status        TEXT NOT NULL DEFAULT 'open',
     -- open / confirmed / done / cancelled
     notes         TEXT,                     -- 管理者内部メモ

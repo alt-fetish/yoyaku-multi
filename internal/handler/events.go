@@ -73,6 +73,10 @@ func (h *EventsHandler) ToggleEntry(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "開催日が見つかりません", http.StatusNotFound)
 		return
 	}
+	if event.Status != "open" {
+		http.Error(w, "この開催日は現在申込みできません", http.StatusForbidden)
+		return
+	}
 
 	if r.Method == http.MethodDelete {
 		// 取消
@@ -92,11 +96,15 @@ func (h *EventsHandler) ToggleEntry(w http.ResponseWriter, r *http.Request) {
 		EventID:     eventID,
 		ApplicantID: applicant.ID,
 	}
-	_ = h.Entries.CreateEntry(entry)
+	created, err := h.Entries.CreateEntryIfAvailable(entry)
+	if err != nil {
+		http.Error(w, "参加表明の登録に失敗しました", http.StatusInternalServerError)
+		return
+	}
 
 	ew := &model.EventWithCount{Event: *event}
 	ew.EntryCount = getEntryCount(h, eventID)
-	events.EventCard(ew, applicantToken, true).Render(r.Context(), w)
+	events.EventCard(ew, applicantToken, created).Render(r.Context(), w)
 }
 
 // MyPage はマイページを表示する
@@ -206,5 +214,13 @@ func (h *EventsHandler) UpdateNGSettings(w http.ResponseWriter, r *http.Request)
 }
 
 func getEntryCount(h *EventsHandler, eventID interface{ String() string }) int {
-	return 0 // シンプル化: 実際はDBから取得
+	id, err := parseUUID(eventID.String())
+	if err != nil {
+		return 0
+	}
+	count, err := h.Events.CountActiveEntries(id)
+	if err != nil {
+		return 0
+	}
+	return count
 }
