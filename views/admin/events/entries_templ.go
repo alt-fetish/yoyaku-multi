@@ -10,11 +10,12 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/ryotaro/yoyaku-multi/internal/model"
 	"github.com/ryotaro/yoyaku-multi/views/layout"
 )
 
-func Entries(event *model.Event, entries []*model.EntryWithApplicant) templ.Component {
+func Entries(event *model.Event, entries []*model.EntryWithApplicant, optionSet *model.OptionSet) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -54,7 +55,7 @@ func Entries(event *model.Event, entries []*model.EntryWithApplicant) templ.Comp
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(event.EventDate.Format("2006/01/02"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 13, Col: 42}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 14, Col: 42}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
@@ -67,7 +68,7 @@ func Entries(event *model.Event, entries []*model.EntryWithApplicant) templ.Comp
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(event.EventTime.Format("15:04"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 13, Col: 78}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 14, Col: 78}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -80,7 +81,7 @@ func Entries(event *model.Event, entries []*model.EntryWithApplicant) templ.Comp
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d名の表明", activeEntryCount(entries)))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 19, Col: 92}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 20, Col: 92}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -93,7 +94,7 @@ func Entries(event *model.Event, entries []*model.EntryWithApplicant) templ.Comp
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("定員%d名", event.Capacity))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 20, Col: 78}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 21, Col: 78}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -116,7 +117,7 @@ func Entries(event *model.Event, entries []*model.EntryWithApplicant) templ.Comp
 				var templ_7745c5c3_Var7 templ.SafeURL
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/admin/events/%s/confirm", event.ID.String())))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 28, Col: 105}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 29, Col: 105}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -126,15 +127,15 @@ func Entries(event *model.Event, entries []*model.EntryWithApplicant) templ.Comp
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				for _, key := range model.NGActionKeys {
+				for _, item := range optionSet.Items {
 					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<th>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var8 string
-					templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(model.NGActionLabels[key])
+					templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(item.Label)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 38, Col: 40}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 39, Col: 25}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 					if templ_7745c5c3_Err != nil {
@@ -162,7 +163,7 @@ func Entries(event *model.Event, entries []*model.EntryWithApplicant) templ.Comp
 						var templ_7745c5c3_Var9 string
 						templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(entry.ApplicantID.String())
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 47, Col: 89}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 48, Col: 89}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 						if templ_7745c5c3_Err != nil {
@@ -180,7 +181,7 @@ func Entries(event *model.Event, entries []*model.EntryWithApplicant) templ.Comp
 					var templ_7745c5c3_Var10 string
 					templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(entry.Handle)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 50, Col: 27}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 51, Col: 27}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 					if templ_7745c5c3_Err != nil {
@@ -193,7 +194,7 @@ func Entries(event *model.Event, entries []*model.EntryWithApplicant) templ.Comp
 					var templ_7745c5c3_Var11 string
 					templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(entry.CreatedAt.Format("1/2 15:04"))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 51, Col: 50}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 52, Col: 50}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 					if templ_7745c5c3_Err != nil {
@@ -206,7 +207,7 @@ func Entries(event *model.Event, entries []*model.EntryWithApplicant) templ.Comp
 					var templ_7745c5c3_Var12 string
 					templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(entryStatusLabel(entry.Status))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 52, Col: 45}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 53, Col: 45}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 					if templ_7745c5c3_Err != nil {
@@ -216,15 +217,15 @@ func Entries(event *model.Event, entries []*model.EntryWithApplicant) templ.Comp
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					for _, key := range model.NGActionKeys {
+					for _, item := range optionSet.Items {
 						templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 19, "<td>")
 						if templ_7745c5c3_Err != nil {
 							return templ_7745c5c3_Err
 						}
 						var templ_7745c5c3_Var13 string
-						templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(ngBadge(entry.NGSettings, key))
+						templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(optionBadge(entry.SelectedOptionItemIDs, item.ID))
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 54, Col: 46}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 55, Col: 65}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 						if templ_7745c5c3_Err != nil {
@@ -252,7 +253,7 @@ func Entries(event *model.Event, entries []*model.EntryWithApplicant) templ.Comp
 					var templ_7745c5c3_Var14 string
 					templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(templ.SafeURL(fmt.Sprintf("/admin/events/%s/decline", event.ID.String())))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 69, Col: 93}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 70, Col: 93}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 					if templ_7745c5c3_Err != nil {
@@ -268,14 +269,14 @@ func Entries(event *model.Event, entries []*model.EntryWithApplicant) templ.Comp
 					return templ_7745c5c3_Err
 				}
 				if len(entries) >= 2 {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<hr class=\"divider\"><h2 class=\"mypage-section-title\">NG比較ビュー</h2><p class=\"text-muted text-sm mb-md\">2名のチェックボックスを選択すると、NG設定の相互比較が表示されます。</p><form hx-get=\"")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<hr class=\"divider\"><h2 class=\"mypage-section-title\">オプション比較ビュー</h2><p class=\"text-muted text-sm mb-md\">2名を選ぶと、選択オプションの比較が表示されます。</p><form hx-get=\"")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var15 string
 					templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/admin/events/%s/entries/compare", event.ID.String()))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 83, Col: 80}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 84, Col: 80}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 					if templ_7745c5c3_Err != nil {
@@ -293,7 +294,7 @@ func Entries(event *model.Event, entries []*model.EntryWithApplicant) templ.Comp
 						var templ_7745c5c3_Var16 string
 						templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(entry.ApplicantID.String())
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 90, Col: 76}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 91, Col: 76}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 						if templ_7745c5c3_Err != nil {
@@ -306,7 +307,7 @@ func Entries(event *model.Event, entries []*model.EntryWithApplicant) templ.Comp
 						var templ_7745c5c3_Var17 string
 						templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(entry.Handle)
 						if templ_7745c5c3_Err != nil {
-							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 91, Col: 22}
+							return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 92, Col: 22}
 						}
 						_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 						if templ_7745c5c3_Err != nil {
@@ -333,7 +334,7 @@ func Entries(event *model.Event, entries []*model.EntryWithApplicant) templ.Comp
 	})
 }
 
-func CompareView(entries []*model.EntryWithApplicant) templ.Component {
+func CompareView(entries []*model.EntryWithApplicant, optionSet *model.OptionSet) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -367,7 +368,7 @@ func CompareView(entries []*model.EntryWithApplicant) templ.Component {
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(entries[0].Handle)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 111, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 112, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -380,7 +381,7 @@ func CompareView(entries []*model.EntryWithApplicant) templ.Component {
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(entries[1].Handle)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 112, Col: 29}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 113, Col: 29}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
@@ -390,8 +391,8 @@ func CompareView(entries []*model.EntryWithApplicant) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			for _, key := range model.NGActionKeys {
-				var templ_7745c5c3_Var21 = []any{compareRowClass(entries[0].NGSettings, entries[1].NGSettings, key)}
+			for _, item := range optionSet.Items {
+				var templ_7745c5c3_Var21 = []any{compareRowClass(entries[0].SelectedOptionItemIDs, entries[1].SelectedOptionItemIDs, item.ID)}
 				templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var21...)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -414,9 +415,9 @@ func CompareView(entries []*model.EntryWithApplicant) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var23 string
-				templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(model.NGActionLabels[key])
+				templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(item.Label)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 119, Col: 38}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 120, Col: 23}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 				if templ_7745c5c3_Err != nil {
@@ -427,9 +428,9 @@ func CompareView(entries []*model.EntryWithApplicant) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var24 string
-				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(ngBadge(entries[0].NGSettings, key))
+				templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(optionBadge(entries[0].SelectedOptionItemIDs, item.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 120, Col: 48}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 121, Col: 67}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 				if templ_7745c5c3_Err != nil {
@@ -440,9 +441,9 @@ func CompareView(entries []*model.EntryWithApplicant) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var25 string
-				templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(ngBadge(entries[1].NGSettings, key))
+				templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(optionBadge(entries[1].SelectedOptionItemIDs, item.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 121, Col: 48}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 122, Col: 67}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 				if templ_7745c5c3_Err != nil {
@@ -453,9 +454,9 @@ func CompareView(entries []*model.EntryWithApplicant) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var26 string
-				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(compareResult(entries[0].NGSettings, entries[1].NGSettings, key))
+				templ_7745c5c3_Var26, templ_7745c5c3_Err = templ.JoinStringErrs(compareResult(entries[0].SelectedOptionItemIDs, entries[1].SelectedOptionItemIDs, item.ID))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 122, Col: 77}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/entries.templ`, Line: 123, Col: 103}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var26))
 				if templ_7745c5c3_Err != nil {
@@ -499,49 +500,46 @@ func entryStatusLabel(s string) string {
 	return s
 }
 
-func ngBadge(settings []*model.NGSetting, key string) string {
-	for _, s := range settings {
-		if s.ActionKey == key {
-			if s.IsOK {
-				return "OK"
-			}
-			return "NG"
+func optionBadge(selected []uuid.UUID, itemID uuid.UUID) string {
+	for _, selectedID := range selected {
+		if selectedID == itemID {
+			return "選択"
 		}
 	}
-	return "NG"
+	return "-"
 }
 
-func isOKSettings(settings []*model.NGSetting, key string) bool {
-	for _, s := range settings {
-		if s.ActionKey == key {
-			return s.IsOK
+func isOptionSelected(selected []uuid.UUID, itemID uuid.UUID) bool {
+	for _, selectedID := range selected {
+		if selectedID == itemID {
+			return true
 		}
 	}
 	return false
 }
 
-func compareRowClass(s1, s2 []*model.NGSetting, key string) string {
-	ok1 := isOKSettings(s1, key)
-	ok2 := isOKSettings(s2, key)
-	if ok1 && ok2 {
+func compareRowClass(s1, s2 []uuid.UUID, itemID uuid.UUID) string {
+	selected1 := isOptionSelected(s1, itemID)
+	selected2 := isOptionSelected(s2, itemID)
+	if selected1 && selected2 {
 		return "ng-both-ok"
 	}
-	if !ok1 && !ok2 {
+	if !selected1 && !selected2 {
 		return "ng-both-ng"
 	}
 	return "ng-one-ng"
 }
 
-func compareResult(s1, s2 []*model.NGSetting, key string) string {
-	ok1 := isOKSettings(s1, key)
-	ok2 := isOKSettings(s2, key)
-	if ok1 && ok2 {
-		return "✅ 両者OK"
+func compareResult(s1, s2 []uuid.UUID, itemID uuid.UUID) string {
+	selected1 := isOptionSelected(s1, itemID)
+	selected2 := isOptionSelected(s2, itemID)
+	if selected1 && selected2 {
+		return "両者選択"
 	}
-	if !ok1 && !ok2 {
-		return "❌ 両者NG"
+	if !selected1 && !selected2 {
+		return "未選択"
 	}
-	return "⚠️ 片方NG"
+	return "片方のみ"
 }
 
 var _ = templruntime.GeneratedTemplate

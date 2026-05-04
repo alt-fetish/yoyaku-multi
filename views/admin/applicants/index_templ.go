@@ -10,8 +10,10 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/ryotaro/yoyaku-multi/internal/model"
 	"github.com/ryotaro/yoyaku-multi/views/layout"
+	"strings"
 )
 
 func Index(applicants []*model.ApplicantWithCount) templ.Component {
@@ -65,7 +67,7 @@ func Index(applicants []*model.ApplicantWithCount) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(a.Handle)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 36, Col: 21}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 38, Col: 21}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -78,7 +80,7 @@ func Index(applicants []*model.ApplicantWithCount) templ.Component {
 				var templ_7745c5c3_Var4 templ.SafeURL
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("mailto:" + a.Email))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 37, Col: 55}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 39, Col: 55}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -91,7 +93,7 @@ func Index(applicants []*model.ApplicantWithCount) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(a.Email)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 37, Col: 67}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 39, Col: 67}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -104,7 +106,7 @@ func Index(applicants []*model.ApplicantWithCount) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d回", a.SessionCount))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 38, Col: 49}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 40, Col: 49}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
@@ -117,7 +119,7 @@ func Index(applicants []*model.ApplicantWithCount) templ.Component {
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(a.CreatedAt.Format("2006/01/02"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 39, Col: 45}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 41, Col: 45}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -135,7 +137,7 @@ func Index(applicants []*model.ApplicantWithCount) templ.Component {
 					var templ_7745c5c3_Var8 string
 					templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d", a.UnreadCount))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 42, Col: 70}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 44, Col: 70}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 					if templ_7745c5c3_Err != nil {
@@ -153,7 +155,7 @@ func Index(applicants []*model.ApplicantWithCount) templ.Component {
 				var templ_7745c5c3_Var9 templ.SafeURL
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/admin/applicants/%s", a.ID.String())))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 47, Col: 84}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 49, Col: 84}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -166,7 +168,7 @@ func Index(applicants []*model.ApplicantWithCount) templ.Component {
 				var templ_7745c5c3_Var10 templ.SafeURL
 				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/admin/chat/%s", a.ID.String())))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 48, Col: 78}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 50, Col: 78}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 				if templ_7745c5c3_Err != nil {
@@ -191,7 +193,7 @@ func Index(applicants []*model.ApplicantWithCount) templ.Component {
 	})
 }
 
-func Show(a *model.Applicant, ngSettings []*model.NGSetting, entries []*model.EntryWithEvent) templ.Component {
+func Show(a *model.Applicant, entries []*model.EntryWithEvent, optionSets map[uuid.UUID]*model.OptionSet, selections map[uuid.UUID][]uuid.UUID) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -231,7 +233,7 @@ func Show(a *model.Applicant, ngSettings []*model.NGSetting, entries []*model.En
 			var templ_7745c5c3_Var13 string
 			templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(a.Handle)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 62, Col: 36}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 64, Col: 36}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 			if templ_7745c5c3_Err != nil {
@@ -244,7 +246,7 @@ func Show(a *model.Applicant, ngSettings []*model.NGSetting, entries []*model.En
 			var templ_7745c5c3_Var14 templ.SafeURL
 			templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/admin/chat/%s", a.ID.String())))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 64, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 66, Col: 73}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 			if templ_7745c5c3_Err != nil {
@@ -257,7 +259,7 @@ func Show(a *model.Applicant, ngSettings []*model.NGSetting, entries []*model.En
 			var templ_7745c5c3_Var15 string
 			templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(a.Handle)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 72, Col: 66}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 74, Col: 66}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 			if templ_7745c5c3_Err != nil {
@@ -270,7 +272,7 @@ func Show(a *model.Applicant, ngSettings []*model.NGSetting, entries []*model.En
 			var templ_7745c5c3_Var16 templ.SafeURL
 			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL("mailto:" + a.Email))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 73, Col: 75}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 75, Col: 75}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 			if templ_7745c5c3_Err != nil {
@@ -283,7 +285,7 @@ func Show(a *model.Applicant, ngSettings []*model.NGSetting, entries []*model.En
 			var templ_7745c5c3_Var17 string
 			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(a.Email)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 73, Col: 87}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 75, Col: 87}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -296,7 +298,7 @@ func Show(a *model.Applicant, ngSettings []*model.NGSetting, entries []*model.En
 			var templ_7745c5c3_Var18 string
 			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(a.CreatedAt.Format("2006/01/02"))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 74, Col: 65}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 76, Col: 65}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -309,7 +311,7 @@ func Show(a *model.Applicant, ngSettings []*model.NGSetting, entries []*model.En
 			var templ_7745c5c3_Var19 string
 			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(a.Status)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 75, Col: 47}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 77, Col: 47}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {
@@ -322,128 +324,103 @@ func Show(a *model.Applicant, ngSettings []*model.NGSetting, entries []*model.En
 			var templ_7745c5c3_Var20 string
 			templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(a.Token)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 80, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 82, Col: 50}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" style=\"font-size: 0.85em; word-break: break-all;\"></code> <button class=\"btn btn-secondary btn-sm\" type=\"button\" onclick=\"copyMyPageURL()\">コピー</button></div></td></tr></table><script>\n\t\t\t\t\t(function() {\n\t\t\t\t\t\tvar el = document.getElementById(\"mypage-url\");\n\t\t\t\t\t\tel.textContent = location.origin + \"/my/\" + el.dataset.token;\n\t\t\t\t\t})();\n\t\t\t\t\tfunction copyMyPageURL() {\n\t\t\t\t\t\tvar url = document.getElementById(\"mypage-url\").textContent;\n\t\t\t\t\t\tnavigator.clipboard.writeText(url).then(function() {\n\t\t\t\t\t\t\tvar btn = event.target;\n\t\t\t\t\t\t\tbtn.textContent = \"コピー済み\";\n\t\t\t\t\t\t\tsetTimeout(function() { btn.textContent = \"コピー\"; }, 2000);\n\t\t\t\t\t\t});\n\t\t\t\t\t}\n\t\t\t\t</script></div><div class=\"card\"><h3 class=\"card-title\">NG行為設定</h3><div class=\"ng-grid\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			for _, key := range model.NGActionKeys {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<div class=\"ng-grid-item\"><span>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var21 string
-				templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(model.NGActionLabels[key])
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 106, Col: 40}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "</span> ")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				if isOK(ngSettings, key) {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<span class=\"badge badge-ok\">OK</span>")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-				} else {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, "<span class=\"badge badge-ng\">NG</span>")
-					if templ_7745c5c3_Err != nil {
-						return templ_7745c5c3_Err
-					}
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</div>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</div></div></div><div class=\"card mt-lg\"><h3 class=\"card-title\">参加履歴</h3>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" style=\"font-size: 0.85em; word-break: break-all;\"></code> <button class=\"btn btn-secondary btn-sm\" type=\"button\" onclick=\"copyMyPageURL()\">コピー</button></div></td></tr></table><script>\n\t\t\t\t\t(function() {\n\t\t\t\t\t\tvar el = document.getElementById(\"mypage-url\");\n\t\t\t\t\t\tel.textContent = location.origin + \"/my/\" + el.dataset.token;\n\t\t\t\t\t})();\n\t\t\t\t\tfunction copyMyPageURL() {\n\t\t\t\t\t\tvar url = document.getElementById(\"mypage-url\").textContent;\n\t\t\t\t\t\tnavigator.clipboard.writeText(url).then(function() {\n\t\t\t\t\t\t\tvar btn = event.target;\n\t\t\t\t\t\t\tbtn.textContent = \"コピー済み\";\n\t\t\t\t\t\t\tsetTimeout(function() { btn.textContent = \"コピー\"; }, 2000);\n\t\t\t\t\t\t});\n\t\t\t\t\t}\n\t\t\t\t</script></div><div class=\"card\"><h3 class=\"card-title\">オプション管理</h3><p class=\"text-muted\">オプションは参加者ごとではなく、各イベント申込ごとに管理しています。</p></div></div><div class=\"card mt-lg\"><h3 class=\"card-title\">参加履歴</h3>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if len(entries) == 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "<p class=\"text-muted\">参加表明がありません。</p>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<p class=\"text-muted\">参加表明がありません。</p>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "<div class=\"table-wrap\"><table><thead><tr><th>日時</th><th>定員</th><th>ステータス</th></tr></thead> <tbody>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 25, "<div class=\"table-wrap\"><table><thead><tr><th>日時</th><th>定員</th><th>ステータス</th><th>選択オプション</th></tr></thead> <tbody>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				for _, e := range entries {
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "<tr><td>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 26, "<tr><td>")
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					var templ_7745c5c3_Var21 string
+					templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinStringErrs(e.Event.EventDate.Format("2006/01/02"))
+					if templ_7745c5c3_Err != nil {
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 127, Col: 53}
+					}
+					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
+					if templ_7745c5c3_Err != nil {
+						return templ_7745c5c3_Err
+					}
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 27, " ")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var22 string
-					templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(e.Event.EventDate.Format("2006/01/02"))
+					templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(e.Event.EventTime.Format("15:04"))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 135, Col: 53}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 127, Col: 91}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, " ")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 28, "</td><td><span class=\"badge badge-open\">")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var23 string
-					templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(e.Event.EventTime.Format("15:04"))
+					templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d名", e.Event.Capacity))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 135, Col: 91}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 129, Col: 81}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 34, "</td><td><span class=\"badge badge-open\">")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 29, "</span></td><td>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var24 string
-					templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d名", e.Event.Capacity))
+					templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinStringErrs(entryStatusLabel(e.Status))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 137, Col: 81}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 131, Col: 41}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 35, "</span></td><td>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 30, "</td><td>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 					var templ_7745c5c3_Var25 string
-					templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(entryStatusLabel(e.Status))
+					templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(optionLabels(optionSets[e.Event.OptionSetID], selections[e.ID]))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 139, Col: 41}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/applicants/index.templ`, Line: 132, Col: 78}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
-					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 36, "</td></tr>")
+					templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 31, "</td></tr>")
 					if templ_7745c5c3_Err != nil {
 						return templ_7745c5c3_Err
 					}
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 37, "</tbody></table></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 32, "</tbody></table></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "</div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 33, "</div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -455,15 +432,6 @@ func Show(a *model.Applicant, ngSettings []*model.NGSetting, entries []*model.En
 		}
 		return nil
 	})
-}
-
-func isOK(settings []*model.NGSetting, key string) bool {
-	for _, s := range settings {
-		if s.ActionKey == key {
-			return s.IsOK
-		}
-	}
-	return false
 }
 
 func entryStatusLabel(s string) string {
@@ -478,6 +446,26 @@ func entryStatusLabel(s string) string {
 		return "取消"
 	}
 	return s
+}
+
+func optionLabels(set *model.OptionSet, selected []uuid.UUID) string {
+	if set == nil || len(selected) == 0 {
+		return "-"
+	}
+	selectedMap := make(map[uuid.UUID]bool, len(selected))
+	for _, id := range selected {
+		selectedMap[id] = true
+	}
+	var labels []string
+	for _, item := range set.Items {
+		if selectedMap[item.ID] {
+			labels = append(labels, item.Label)
+		}
+	}
+	if len(labels) == 0 {
+		return "-"
+	}
+	return strings.Join(labels, ", ")
 }
 
 var _ = templruntime.GeneratedTemplate

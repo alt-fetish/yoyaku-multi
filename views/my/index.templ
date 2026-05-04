@@ -6,7 +6,7 @@ import (
 	"github.com/ryotaro/yoyaku-multi/views/layout"
 )
 
-templ Index(applicant *model.Applicant, entries []*model.EntryWithEvent, ngSettings []*model.NGSetting, messages []*model.ChatMessage) {
+templ Index(applicant *model.Applicant, entries []*model.EntryWithEvent, optionSets map[string]*model.OptionSet, selections map[string]map[string]bool, messages []*model.ChatMessage) {
 	@layout.Base("マイページ") {
 		<div class="container">
 			<div class="page-header">
@@ -47,29 +47,45 @@ templ Index(applicant *model.Applicant, entries []*model.EntryWithEvent, ngSetti
 				}
 			</section>
 
-			<!-- NG設定 -->
-			<section class="mypage-section">
-				<h2 class="mypage-section-title">NG行為設定</h2>
-				<form method="POST" action={ templ.SafeURL("/my/" + applicant.Token + "/ng-settings") }>
-					<div class="ng-grid">
-						for _, key := range model.NGActionKeys {
-							<label class="ng-grid-item ng-grid-item--selectable">
-								<span>{ model.NGActionLabels[key] }</span>
-								<input
-									type="checkbox"
-									name={ "ng_" + key }
-									value="ok"
-									if isOK(ngSettings, key) {
-										checked
-									}
-								/>
-								<span class="ng-check-label">OK</span>
-							</label>
+			if len(entries) > 0 {
+				<section class="mypage-section">
+					<h2 class="mypage-section-title">申込ごとのオプション</h2>
+					<div class="stack-lg">
+						for _, entry := range entries {
+							if set := optionSets[entry.Event.OptionSetID.String()]; set != nil {
+								<div class="card">
+									<div class="flex gap-sm" style="justify-content: space-between; align-items: baseline; flex-wrap: wrap;">
+										<div>
+											<h3 class="card-title" style="margin-bottom: 0;">{ entry.Event.EventDate.Format("2006年1月2日") } { entry.Event.EventTime.Format("15:04") }〜</h3>
+											<p class="text-muted text-sm">{ set.Name }</p>
+										</div>
+										<span class="badge badge-open">{ statusLabel(entry.Status) }</span>
+									</div>
+									<form method="POST" action={ templ.SafeURL("/my/" + applicant.Token + "/entries/" + entry.ID.String() + "/options") }>
+										<div class="ng-grid" style="margin-top: var(--space-md);">
+											for _, item := range set.Items {
+												<label class="ng-grid-item ng-grid-item--selectable">
+													<span>{ item.Label }</span>
+													<input
+														type="checkbox"
+														name="option_item_ids"
+														value={ item.ID.String() }
+														if isSelected(selections[entry.ID.String()], item.ID.String()) {
+															checked
+														}
+													/>
+													<span class="ng-check-label">選択</span>
+												</label>
+											}
+										</div>
+										<button type="submit" class="btn btn-primary" style="margin-top:1rem;">オプションを保存</button>
+									</form>
+								</div>
+							}
 						}
 					</div>
-					<button type="submit" class="btn btn-primary" style="margin-top:1rem;">NG設定を保存</button>
-				</form>
-			</section>
+				</section>
+			}
 
 			<!-- チャット -->
 			<section class="mypage-section">
@@ -125,11 +141,6 @@ func statusLabel(s string) string {
 	return s
 }
 
-func isOK(settings []*model.NGSetting, key string) bool {
-	for _, s := range settings {
-		if s.ActionKey == key {
-			return s.IsOK
-		}
-	}
-	return false
+func isSelected(selected map[string]bool, itemID string) bool {
+	return selected[itemID]
 }

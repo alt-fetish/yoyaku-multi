@@ -70,6 +70,7 @@ func main() {
 
 	// リポジトリ初期化
 	applicantRepo := &model.PostgresApplicantRepo{DB: pool}
+	optionRepo := &model.PostgresOptionRepo{DB: pool}
 	eventRepo := &model.PostgresEventRepo{DB: pool}
 	entryRepo := &model.PostgresEntryRepo{DB: pool}
 	sessionRepo := &model.PostgresSessionRepo{DB: pool}
@@ -86,6 +87,7 @@ func main() {
 		Events:     eventRepo,
 		Entries:    entryRepo,
 		Applicants: applicantRepo,
+		Options:    optionRepo,
 		Chat:       chatRepo,
 	}
 
@@ -93,6 +95,7 @@ func main() {
 		Events:     eventRepo,
 		Entries:    entryRepo,
 		Applicants: applicantRepo,
+		Options:    optionRepo,
 		Mailer:     mailer,
 		BaseURL:    baseURL,
 	}
@@ -100,6 +103,11 @@ func main() {
 	adminApplicantsHandler := &handler.AdminApplicantsHandler{
 		Applicants: applicantRepo,
 		Entries:    entryRepo,
+		Options:    optionRepo,
+	}
+
+	adminOptionsHandler := &handler.AdminOptionsHandler{
+		Options: optionRepo,
 	}
 
 	adminSessionsHandler := &handler.AdminSessionsHandler{
@@ -131,13 +139,14 @@ func main() {
 	mux.HandleFunc("POST /register", registerHandler.Submit)
 
 	mux.HandleFunc("GET /events", eventsHandler.ListEvents)
+	mux.HandleFunc("GET /events/{id}", eventsHandler.ShowEvent)
 	mux.HandleFunc("POST /events/{id}/entry", eventsHandler.ToggleEntry)
 	mux.HandleFunc("DELETE /events/{id}/entry", eventsHandler.ToggleEntry)
 
 	mux.HandleFunc("GET /my/{token}", eventsHandler.MyPage)
 	mux.HandleFunc("POST /my/{token}/chat", eventsHandler.MyPageChat)
 	mux.HandleFunc("GET /my/{token}/chat/messages", eventsHandler.MyPageChatMessages)
-	mux.HandleFunc("POST /my/{token}/ng-settings", eventsHandler.UpdateNGSettings)
+	mux.HandleFunc("POST /my/{token}/entries/{entry_id}/options", eventsHandler.UpdateEntryOptions)
 
 	// --- 管理者ログイン ---
 	mux.HandleFunc("GET /admin/login", func(w http.ResponseWriter, r *http.Request) {
@@ -188,6 +197,14 @@ func main() {
 	// 参加者管理
 	adminMux.HandleFunc("GET /admin/applicants", adminApplicantsHandler.List)
 	adminMux.HandleFunc("GET /admin/applicants/{id}", adminApplicantsHandler.Show)
+
+	// オプション管理
+	adminMux.HandleFunc("GET /admin/options", adminOptionsHandler.List)
+	adminMux.HandleFunc("GET /admin/options/new", adminOptionsHandler.ShowNew)
+	adminMux.HandleFunc("POST /admin/options", adminOptionsHandler.Create)
+	adminMux.HandleFunc("GET /admin/options/{id}/edit", adminOptionsHandler.ShowEdit)
+	adminMux.HandleFunc("POST /admin/options/{id}/edit", adminOptionsHandler.Update)
+	adminMux.HandleFunc("POST /admin/options/{id}/delete", adminOptionsHandler.Delete)
 
 	// セッション履歴
 	adminMux.HandleFunc("GET /admin/sessions", adminSessionsHandler.List)

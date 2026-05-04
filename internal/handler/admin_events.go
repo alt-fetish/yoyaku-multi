@@ -18,6 +18,7 @@ type AdminEventsHandler struct {
 	Events     *model.PostgresEventRepo
 	Entries    *model.PostgresEntryRepo
 	Applicants *model.PostgresApplicantRepo
+	Options    *model.PostgresOptionRepo
 	Mailer     *mail.ResendMailer
 	BaseURL    string
 }
@@ -33,30 +34,42 @@ func (h *AdminEventsHandler) List(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminEventsHandler) ShowNew(w http.ResponseWriter, r *http.Request) {
-	admin_events.New("").Render(r.Context(), w)
+	optionSets, err := h.Options.ListOptionSets()
+	if err != nil {
+		http.Error(w, "オプションセットの取得に失敗しました", http.StatusInternalServerError)
+		return
+	}
+	admin_events.New("", optionSets).Render(r.Context(), w)
 }
 
 func (h *AdminEventsHandler) Create(w http.ResponseWriter, r *http.Request) {
+	optionSets, _ := h.Options.ListOptionSets()
 	if err := r.ParseForm(); err != nil {
-		admin_events.New("入力データの解析に失敗しました").Render(r.Context(), w)
+		admin_events.New("入力データの解析に失敗しました", optionSets).Render(r.Context(), w)
 		return
 	}
 
 	eventDate, err := time.Parse("2006-01-02", r.FormValue("event_date"))
 	if err != nil {
-		admin_events.New("日付形式が不正です（YYYY-MM-DD）").Render(r.Context(), w)
+		admin_events.New("日付形式が不正です（YYYY-MM-DD）", optionSets).Render(r.Context(), w)
 		return
 	}
 
 	eventTime, err := time.Parse("15:04", r.FormValue("event_time"))
 	if err != nil {
-		admin_events.New("時刻形式が不正です（HH:MM）").Render(r.Context(), w)
+		admin_events.New("時刻形式が不正です（HH:MM）", optionSets).Render(r.Context(), w)
 		return
 	}
 
 	capacity := strconvInt(r.FormValue("capacity"))
 	if capacity <= 0 {
-		admin_events.New("定員は1以上の整数で入力してください").Render(r.Context(), w)
+		admin_events.New("定員は1以上の整数で入力してください", optionSets).Render(r.Context(), w)
+		return
+	}
+
+	optionSetID, err := parseUUID(r.FormValue("option_set_id"))
+	if err != nil {
+		admin_events.New("オプションセットを選択してください", optionSets).Render(r.Context(), w)
 		return
 	}
 
@@ -65,6 +78,7 @@ func (h *AdminEventsHandler) Create(w http.ResponseWriter, r *http.Request) {
 		EventDate:   eventDate,
 		EventTime:   eventTime,
 		Capacity:    capacity,
+		OptionSetID: optionSetID,
 		Notes:       r.FormValue("notes"),
 	}
 
@@ -76,7 +90,7 @@ func (h *AdminEventsHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.Events.CreateEvent(e); err != nil {
-		admin_events.New("登録に失敗しました: "+err.Error()).Render(r.Context(), w)
+		admin_events.New("登録に失敗しました: "+err.Error(), optionSets).Render(r.Context(), w)
 		return
 	}
 
@@ -115,17 +129,23 @@ func (h *AdminEventsHandler) ShowEdit(w http.ResponseWriter, r *http.Request) {
 	if e.EndTime != nil {
 		endTimeStr = e.EndTime.Format("15:04")
 	}
-
-	formData := &admin_events.EventFormData{
-		ID:        e.ID.String(),
-		EventDate: e.EventDate.Format("2006-01-02"),
-		EventTime: e.EventTime.Format("15:04"),
-		EndTime:   endTimeStr,
-		Capacity:  strconv.Itoa(e.Capacity),
-		Notes:     e.Notes,
+	optionSets, err := h.Options.ListOptionSets()
+	if err != nil {
+		http.Error(w, "オプションセットの取得に失敗しました", http.StatusInternalServerError)
+		return
 	}
 
-	admin_events.Edit(formData, "").Render(r.Context(), w)
+	formData := &admin_events.EventFormData{
+		ID:          e.ID.String(),
+		EventDate:   e.EventDate.Format("2006-01-02"),
+		EventTime:   e.EventTime.Format("15:04"),
+		EndTime:     endTimeStr,
+		Capacity:    strconv.Itoa(e.Capacity),
+		OptionSetID: e.OptionSetID.String(),
+		Notes:       e.Notes,
+	}
+
+	admin_events.Edit(formData, optionSets, "").Render(r.Context(), w)
 }
 
 func (h *AdminEventsHandler) Update(w http.ResponseWriter, r *http.Request) {
@@ -167,11 +187,17 @@ func (h *AdminEventsHandler) Update(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "定員は1以上の整数で入力してください", http.StatusBadRequest)
 		return
 	}
+	optionSetID, err := parseUUID(r.FormValue("option_set_id"))
+	if err != nil {
+		http.Error(w, "オプションセットを選択してください", http.StatusBadRequest)
+		return
+	}
 
 	e.SessionType = "group"
 	e.EventDate = eventDate
 	e.EventTime = eventTime
 	e.Capacity = capacity
+	e.OptionSetID = optionSetID
 	e.Notes = r.FormValue("notes")
 
 	if endTimeStr := r.FormValue("end_time"); endTimeStr != "" {
@@ -226,19 +252,24 @@ func (h *AdminEventsHandler) ShowEntries(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	// NG設定を取得
-	var applicantIDs []uuid.UUID
-	for _, e := range entryList {
-		applicantIDs = append(applicantIDs, e.ApplicantID)
+	optionSet, err := h.Options.GetOptionSet(event.OptionSetID)
+	if err != nil {
+		http.Error(w, "オプションセットの取得に失敗しました", http.StatusInternalServerError)
+		return
 	}
-	ngMap, err := h.Applicants.GetNGSettingsForApplicants(applicantIDs)
+
+	var entryIDs []uuid.UUID
+	for _, e := range entryList {
+		entryIDs = append(entryIDs, e.ID)
+	}
+	selectionMap, err := h.Options.GetSelectionsByEntryIDs(entryIDs)
 	if err == nil {
 		for _, entry := range entryList {
-			entry.NGSettings = ngMap[entry.ApplicantID]
+			entry.SelectedOptionItemIDs = selectionMap[entry.ID]
 		}
 	}
 
-	admin_events.Entries(event, entryList).Render(r.Context(), w)
+	admin_events.Entries(event, entryList, optionSet).Render(r.Context(), w)
 }
 
 func (h *AdminEventsHandler) CompareEntries(w http.ResponseWriter, r *http.Request) {
@@ -250,7 +281,18 @@ func (h *AdminEventsHandler) CompareEntries(w http.ResponseWriter, r *http.Reque
 
 	ids := r.URL.Query()["ids"]
 	if len(ids) != 2 {
-		admin_events.CompareView(nil).Render(r.Context(), w)
+		admin_events.CompareView(nil, nil).Render(r.Context(), w)
+		return
+	}
+
+	event, err := h.Events.GetEvent(eventID)
+	if err != nil {
+		http.Error(w, "開催日が見つかりません", http.StatusNotFound)
+		return
+	}
+	optionSet, err := h.Options.GetOptionSet(event.OptionSetID)
+	if err != nil {
+		http.Error(w, "オプションセットの取得に失敗しました", http.StatusInternalServerError)
 		return
 	}
 
@@ -267,19 +309,18 @@ func (h *AdminEventsHandler) CompareEntries(w http.ResponseWriter, r *http.Reque
 		ewa := &model.EntryWithApplicant{
 			EventEntry: *entry,
 		}
-		// ハンドルとNG設定取得
+		selectionMap, err := h.Options.GetSelectionsByEntryIDs([]uuid.UUID{entry.ID})
+		if err == nil {
+			ewa.SelectedOptionItemIDs = selectionMap[entry.ID]
+		}
 		applicant, err := h.Applicants.GetApplicant(aID)
 		if err == nil {
 			ewa.Handle = applicant.Handle
 		}
-		ngSettings, err := h.Applicants.GetNGSettings(aID)
-		if err == nil {
-			ewa.NGSettings = ngSettings
-		}
 		result = append(result, ewa)
 	}
 
-	admin_events.CompareView(result).Render(r.Context(), w)
+	admin_events.CompareView(result, optionSet).Render(r.Context(), w)
 }
 
 func (h *AdminEventsHandler) Confirm(w http.ResponseWriter, r *http.Request) {
@@ -385,29 +426,35 @@ func (h *AdminEventsHandler) MarkDone(w http.ResponseWriter, r *http.Request) {
 // --- CSV Upload ---
 
 func (h *AdminEventsHandler) ShowUpload(w http.ResponseWriter, r *http.Request) {
-	admin_events.Upload("").Render(r.Context(), w)
+	optionSets, err := h.Options.ListOptionSets()
+	if err != nil {
+		http.Error(w, "オプションセットの取得に失敗しました", http.StatusInternalServerError)
+		return
+	}
+	admin_events.Upload("", optionSets, "").Render(r.Context(), w)
 }
 
 func (h *AdminEventsHandler) PreviewCSV(w http.ResponseWriter, r *http.Request) {
 	if err := r.ParseMultipartForm(10 << 20); err != nil {
-		admin_events.UploadPreview(nil, nil, "ファイルの解析に失敗しました").Render(r.Context(), w)
+		admin_events.UploadPreview(nil, nil, "", "ファイルの解析に失敗しました").Render(r.Context(), w)
 		return
 	}
+	optionSetID := r.FormValue("option_set_id")
 
 	file, _, err := r.FormFile("csv_file")
 	if err != nil {
-		admin_events.UploadPreview(nil, nil, "ファイルが選択されていません").Render(r.Context(), w)
+		admin_events.UploadPreview(nil, nil, optionSetID, "ファイルが選択されていません").Render(r.Context(), w)
 		return
 	}
 	defer file.Close()
 
 	rows, parseErrors, err := model.ParseCSV(file)
 	if err != nil {
-		admin_events.UploadPreview(nil, nil, err.Error()).Render(r.Context(), w)
+		admin_events.UploadPreview(nil, nil, optionSetID, err.Error()).Render(r.Context(), w)
 		return
 	}
 
-	admin_events.UploadPreview(rows, parseErrors, "").Render(r.Context(), w)
+	admin_events.UploadPreview(rows, parseErrors, optionSetID, "").Render(r.Context(), w)
 }
 
 func (h *AdminEventsHandler) ConfirmCSV(w http.ResponseWriter, r *http.Request) {
@@ -418,6 +465,11 @@ func (h *AdminEventsHandler) ConfirmCSV(w http.ResponseWriter, r *http.Request) 
 
 	// hiddenフィールドからrows[]を取得
 	var rows []model.EventRow
+	optionSetID, err := parseUUID(r.FormValue("option_set_id"))
+	if err != nil {
+		http.Error(w, "オプションセットを選択してください", http.StatusBadRequest)
+		return
+	}
 	for i := 0; ; i++ {
 		date := r.FormValue(fmt.Sprintf("rows[%d][date]", i))
 		if date == "" {
@@ -431,7 +483,7 @@ func (h *AdminEventsHandler) ConfirmCSV(w http.ResponseWriter, r *http.Request) 
 		})
 	}
 
-	result := h.Events.BulkCreateEvents(rows)
+	result := h.Events.BulkCreateEvents(rows, optionSetID)
 
 	// 結果ページを表示
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")

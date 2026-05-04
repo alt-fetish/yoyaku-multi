@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/ryotaro/yoyaku-multi/internal/model"
 	admin_applicants "github.com/ryotaro/yoyaku-multi/views/admin/applicants"
 )
@@ -11,6 +12,7 @@ import (
 type AdminApplicantsHandler struct {
 	Applicants *model.PostgresApplicantRepo
 	Entries    *model.PostgresEntryRepo
+	Options    *model.PostgresOptionRepo
 }
 
 func (h *AdminApplicantsHandler) List(w http.ResponseWriter, r *http.Request) {
@@ -35,15 +37,26 @@ func (h *AdminApplicantsHandler) Show(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ngSettings, err := h.Applicants.GetNGSettings(id)
-	if err != nil {
-		ngSettings = nil
-	}
-
 	entries, err := h.Entries.ListEntriesByApplicant(id)
 	if err != nil {
 		entries = nil
 	}
 
-	admin_applicants.Show(applicant, ngSettings, entries).Render(r.Context(), w)
+	var optionSetIDs []uuid.UUID
+	var entryIDs []uuid.UUID
+	for _, entry := range entries {
+		optionSetIDs = append(optionSetIDs, entry.Event.OptionSetID)
+		entryIDs = append(entryIDs, entry.ID)
+	}
+
+	optionSets, err := h.Options.GetOptionSetsMap(optionSetIDs)
+	if err != nil {
+		optionSets = map[uuid.UUID]*model.OptionSet{}
+	}
+	selections, err := h.Options.GetSelectionsByEntryIDs(entryIDs)
+	if err != nil {
+		selections = map[uuid.UUID][]uuid.UUID{}
+	}
+
+	admin_applicants.Show(applicant, entries, optionSets, selections).Render(r.Context(), w)
 }

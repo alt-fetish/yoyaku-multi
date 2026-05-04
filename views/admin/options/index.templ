@@ -1,0 +1,65 @@
+package admin_options
+
+import (
+	"fmt"
+	"strings"
+	"github.com/ryotaro/yoyaku-multi/internal/model"
+	"github.com/ryotaro/yoyaku-multi/views/layout"
+)
+
+templ Index(optionSets []*model.OptionSet) {
+	@layout.AdminBase("オプション管理", "options") {
+		<div class="page-header">
+			<h1 class="page-title">オプション管理</h1>
+			<div class="page-actions">
+				<a href="/admin/options/new" class="btn btn-primary">＋ オプションセット作成</a>
+				<a href="/admin/events" class="btn btn-secondary">← 開催日管理へ戻る</a>
+			</div>
+		</div>
+
+		<div class="table-wrap">
+			<table>
+				<thead>
+					<tr>
+						<th>名前</th>
+						<th>説明</th>
+						<th>項目数</th>
+						<th>項目</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					if len(optionSets) == 0 {
+						<tr>
+							<td colspan="5" class="text-muted text-center" style="padding: var(--space-lg);">オプションセットがありません</td>
+						</tr>
+					}
+					for _, set := range optionSets {
+						<tr>
+							<td>{ set.Name }</td>
+							<td>{ set.Description }</td>
+							<td>{ fmt.Sprintf("%d件", len(set.Items)) }</td>
+							<td>{ joinOptionLabels(set.Items) }</td>
+							<td>
+								<div class="flex gap-sm">
+									<a href={ templ.SafeURL("/admin/options/" + set.ID.String() + "/edit") } class="btn btn-secondary btn-sm">編集</a>
+									<form method="POST" action={ templ.SafeURL("/admin/options/" + set.ID.String() + "/delete") } style="display:inline;">
+										<button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('このオプションセットを削除しますか？')">削除</button>
+									</form>
+								</div>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
+	}
+}
+
+func joinOptionLabels(items []*model.OptionItem) string {
+	labels := make([]string, 0, len(items))
+	for _, item := range items {
+		labels = append(labels, item.Label)
+	}
+	return strings.Join(labels, ", ")
+}

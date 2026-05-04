@@ -2,11 +2,12 @@ package admin_events
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/ryotaro/yoyaku-multi/internal/model"
 	"github.com/ryotaro/yoyaku-multi/views/layout"
 )
 
-templ Entries(event *model.Event, entries []*model.EntryWithApplicant) {
+templ Entries(event *model.Event, entries []*model.EntryWithApplicant, optionSet *model.OptionSet) {
 	@layout.AdminBase("参加表明者一覧", "events") {
 		<div class="page-header">
 			<h1 class="page-title">
@@ -34,8 +35,8 @@ templ Entries(event *model.Event, entries []*model.EntryWithApplicant) {
 								<th>ハンドル</th>
 								<th>表明日時</th>
 								<th>ステータス</th>
-								for _, key := range model.NGActionKeys {
-									<th>{ model.NGActionLabels[key] }</th>
+								for _, item := range optionSet.Items {
+									<th>{ item.Label }</th>
 								}
 							</tr>
 						</thead>
@@ -50,8 +51,8 @@ templ Entries(event *model.Event, entries []*model.EntryWithApplicant) {
 									<td>{ entry.Handle }</td>
 									<td>{ entry.CreatedAt.Format("1/2 15:04") }</td>
 									<td>{ entryStatusLabel(entry.Status) }</td>
-									for _, key := range model.NGActionKeys {
-										<td>{ ngBadge(entry.NGSettings, key) }</td>
+									for _, item := range optionSet.Items {
+										<td>{ optionBadge(entry.SelectedOptionItemIDs, item.ID) }</td>
 									}
 								</tr>
 							}
@@ -77,8 +78,8 @@ templ Entries(event *model.Event, entries []*model.EntryWithApplicant) {
 
 			if len(entries) >= 2 {
 				<hr class="divider"/>
-				<h2 class="mypage-section-title">NG比較ビュー</h2>
-				<p class="text-muted text-sm mb-md">2名のチェックボックスを選択すると、NG設定の相互比較が表示されます。</p>
+				<h2 class="mypage-section-title">オプション比較ビュー</h2>
+				<p class="text-muted text-sm mb-md">2名を選ぶと、選択オプションの比較が表示されます。</p>
 				<form
 					hx-get={ fmt.Sprintf("/admin/events/%s/entries/compare", event.ID.String()) }
 					hx-target="#compare-result"
@@ -99,7 +100,7 @@ templ Entries(event *model.Event, entries []*model.EntryWithApplicant) {
 	}
 }
 
-templ CompareView(entries []*model.EntryWithApplicant) {
+templ CompareView(entries []*model.EntryWithApplicant, optionSet *model.OptionSet) {
 	if len(entries) != 2 {
 		<p class="text-muted">2名を選択してください。</p>
 	} else {
@@ -114,12 +115,12 @@ templ CompareView(entries []*model.EntryWithApplicant) {
 					</tr>
 				</thead>
 				<tbody>
-					for _, key := range model.NGActionKeys {
-						<tr class={ compareRowClass(entries[0].NGSettings, entries[1].NGSettings, key) }>
-							<td>{ model.NGActionLabels[key] }</td>
-							<td>{ ngBadge(entries[0].NGSettings, key) }</td>
-							<td>{ ngBadge(entries[1].NGSettings, key) }</td>
-							<td>{ compareResult(entries[0].NGSettings, entries[1].NGSettings, key) }</td>
+					for _, item := range optionSet.Items {
+						<tr class={ compareRowClass(entries[0].SelectedOptionItemIDs, entries[1].SelectedOptionItemIDs, item.ID) }>
+							<td>{ item.Label }</td>
+							<td>{ optionBadge(entries[0].SelectedOptionItemIDs, item.ID) }</td>
+							<td>{ optionBadge(entries[1].SelectedOptionItemIDs, item.ID) }</td>
+							<td>{ compareResult(entries[0].SelectedOptionItemIDs, entries[1].SelectedOptionItemIDs, item.ID) }</td>
 						</tr>
 					}
 				</tbody>
@@ -152,47 +153,44 @@ func entryStatusLabel(s string) string {
 	return s
 }
 
-func ngBadge(settings []*model.NGSetting, key string) string {
-	for _, s := range settings {
-		if s.ActionKey == key {
-			if s.IsOK {
-				return "OK"
-			}
-			return "NG"
+func optionBadge(selected []uuid.UUID, itemID uuid.UUID) string {
+	for _, selectedID := range selected {
+		if selectedID == itemID {
+			return "選択"
 		}
 	}
-	return "NG"
+	return "-"
 }
 
-func isOKSettings(settings []*model.NGSetting, key string) bool {
-	for _, s := range settings {
-		if s.ActionKey == key {
-			return s.IsOK
+func isOptionSelected(selected []uuid.UUID, itemID uuid.UUID) bool {
+	for _, selectedID := range selected {
+		if selectedID == itemID {
+			return true
 		}
 	}
 	return false
 }
 
-func compareRowClass(s1, s2 []*model.NGSetting, key string) string {
-	ok1 := isOKSettings(s1, key)
-	ok2 := isOKSettings(s2, key)
-	if ok1 && ok2 {
+func compareRowClass(s1, s2 []uuid.UUID, itemID uuid.UUID) string {
+	selected1 := isOptionSelected(s1, itemID)
+	selected2 := isOptionSelected(s2, itemID)
+	if selected1 && selected2 {
 		return "ng-both-ok"
 	}
-	if !ok1 && !ok2 {
+	if !selected1 && !selected2 {
 		return "ng-both-ng"
 	}
 	return "ng-one-ng"
 }
 
-func compareResult(s1, s2 []*model.NGSetting, key string) string {
-	ok1 := isOKSettings(s1, key)
-	ok2 := isOKSettings(s2, key)
-	if ok1 && ok2 {
-		return "✅ 両者OK"
+func compareResult(s1, s2 []uuid.UUID, itemID uuid.UUID) string {
+	selected1 := isOptionSelected(s1, itemID)
+	selected2 := isOptionSelected(s2, itemID)
+	if selected1 && selected2 {
+		return "両者選択"
 	}
-	if !ok1 && !ok2 {
-		return "❌ 両者NG"
+	if !selected1 && !selected2 {
+		return "未選択"
 	}
-	return "⚠️ 片方NG"
+	return "片方のみ"
 }

@@ -29,4 +29,7 @@ echo "003_sessions.sql 完了"
 psql "$DATABASE_URL" -f migrations/004_event_capacity.sql
 echo "004_event_capacity.sql 完了"
 
+psql "$DATABASE_URL" -f migrations/005_option_sets.sql
+echo "005_option_sets.sql 完了"
+
 echo "=== マイグレーション完了 ==="

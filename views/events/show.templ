@@ -1,0 +1,89 @@
+package events
+
+import (
+	"fmt"
+	"github.com/ryotaro/yoyaku-multi/internal/model"
+	"github.com/ryotaro/yoyaku-multi/views/layout"
+)
+
+templ Show(event *model.Event, optionSet *model.OptionSet, applicantToken string, entry *model.EventEntry, selected map[string]bool, entryCount int) {
+	@layout.Base("イベント申込") {
+		<div class="container">
+			<div class="page-header">
+				<h1 class="page-title">イベント申込</h1>
+				<a href={ templ.SafeURL("/events?token=" + applicantToken) } class="btn btn-secondary">← 開催日一覧に戻る</a>
+			</div>
+
+			<div class="card" style="max-width: 720px; margin: 0 auto;">
+				<div class="stack-sm">
+					<div class="event-datetime">{ event.EventDate.Format("2006年1月2日（Mon）") } { event.EventTime.Format("15:04") }〜</div>
+					<div class="event-meta">
+						<span class="badge badge-open">{ fmt.Sprintf("定員%d名", event.Capacity) }</span>
+						<span class="text-muted">{ slotsText(event.Capacity, entryCount) }</span>
+						<span class="text-muted">{ optionSet.Name }</span>
+					</div>
+					if optionSet.Description != "" {
+						<p class="text-muted">{ optionSet.Description }</p>
+					}
+				</div>
+
+				if applicantToken == "" {
+					<div class="alert alert-info" style="margin-top: var(--space-lg);">
+						このイベントに申し込むには参加者登録が必要です。
+					</div>
+					<a href="/register" class="btn btn-primary" style="margin-top: var(--space-md);">参加者登録へ進む</a>
+				} else {
+					<form
+						method="POST"
+						action={
+							templ.SafeURL(
+								formAction(event.ID.String(), applicantToken, entry),
+							)
+						}
+						style="margin-top: var(--space-lg);"
+					>
+						if entry != nil {
+							<input type="hidden" name="return_to" value={ "/events/" + event.ID.String() + "?token=" + applicantToken }/>
+						}
+						<div class="form-group">
+							<label class="form-label">オプションを選択</label>
+							<p class="form-hint">複数選択できます。必要な項目だけチェックしてください。</p>
+							<div class="ng-grid" style="margin-top: var(--space-md);">
+								for _, item := range optionSet.Items {
+									<label class="ng-grid-item ng-grid-item--selectable">
+										<span>{ item.Label }</span>
+										<input
+											type="checkbox"
+											name="option_item_ids"
+											value={ item.ID.String() }
+											if selected[item.ID.String()] {
+												checked
+											}
+										/>
+										<span class="ng-check-label">選択</span>
+									</label>
+								}
+							</div>
+						</div>
+						if entry == nil && isSoldOut(event.Capacity, entryCount) {
+							<div class="alert alert-warning" style="margin-bottom: var(--space-md);">この開催日は満席です。</div>
+							<button type="submit" class="btn btn-secondary" disabled>SOLD OUT</button>
+						} else if entry == nil {
+							<button type="submit" class="btn btn-primary">この内容で申し込む</button>
+						} else {
+							<div class="alert alert-info" style="margin-bottom: var(--space-md);">参加表明済みです。必要ならオプションだけ更新できます。</div>
+							<button type="submit" class="btn btn-primary">オプションを更新する</button>
+						}
+					</form>
+				}
+			</div>
+		</div>
+	}
+}
+
+func formAction(eventID string, applicantToken string, entry *model.EventEntry) string {
+	if entry == nil {
+		return fmt.Sprintf("/events/%s/entry?token=%s", eventID, applicantToken)
+	}
+	return fmt.Sprintf("/my/%s/entries/%s/options", applicantToken, entry.ID.String())
+}

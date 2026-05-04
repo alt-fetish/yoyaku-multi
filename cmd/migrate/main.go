@@ -24,6 +24,7 @@ func main() {
 		"migrations/002_chat.sql",
 		"migrations/003_sessions.sql",
 		"migrations/004_event_capacity.sql",
+		"migrations/005_option_sets.sql",
 	}
 
 	for _, f := range files {

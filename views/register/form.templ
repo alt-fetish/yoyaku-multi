@@ -1,9 +1,6 @@
 package register
 
-import (
-	"github.com/ryotaro/yoyaku-multi/internal/model"
-	"github.com/ryotaro/yoyaku-multi/views/layout"
-)
+import "github.com/ryotaro/yoyaku-multi/views/layout"
 
 templ Form(errMsg string) {
 	@layout.Base("参加者登録") {
@@ -26,29 +23,6 @@ templ Form(errMsg string) {
 						<label class="form-label" for="email">メールアドレス <span style="color:var(--color-danger)">*</span></label>
 						<input class="form-control" type="email" id="email" name="email" required placeholder="example@email.com"/>
 						<p class="form-hint">登録完了後、マイページURLをお送りします。</p>
-					</div>
-					<div class="form-group">
-						<p class="form-label">NG行為設定</p>
-						<p class="form-hint mb-sm">
-							デフォルトはすべて <strong>NG</strong> です。許可する行為のみ「OK」に変更してください。
-						</p>
-						<div class="checklist">
-							for _, key := range model.NGActionKeys {
-								<div class="checklist-item">
-									<span class="checklist-label">{ model.NGActionLabels[key] }</span>
-									<div class="checklist-toggle">
-										<label>
-											<input type="radio" name={ "ng_" + key } value="ng" checked/>
-											<span class="badge badge-ng">NG</span>
-										</label>
-										<label>
-											<input type="radio" name={ "ng_" + key } value="ok"/>
-											<span class="badge badge-ok">OK</span>
-										</label>
-									</div>
-								</div>
-							}
-						</div>
 					</div>
 					<button type="submit" class="btn btn-primary btn-lg w-full" style="margin-top: var(--space-lg);">
 						登録する

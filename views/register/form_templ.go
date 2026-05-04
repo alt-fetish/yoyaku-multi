@@ -8,10 +8,7 @@ package register
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import (
-	"github.com/ryotaro/yoyaku-multi/internal/model"
-	"github.com/ryotaro/yoyaku-multi/views/layout"
-)
+import "github.com/ryotaro/yoyaku-multi/views/layout"
 
 func Form(errMsg string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -58,7 +55,7 @@ func Form(errMsg string) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(errMsg)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/register/form.templ`, Line: 18, Col: 44}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/register/form.templ`, Line: 15, Col: 44}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -69,56 +66,7 @@ func Form(errMsg string) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<form method=\"POST\" action=\"/register\"><div class=\"form-group\"><label class=\"form-label\" for=\"handle\">ハンドルネーム <span style=\"color:var(--color-danger)\">*</span></label> <input class=\"form-control\" type=\"text\" id=\"handle\" name=\"handle\" required placeholder=\"例：Taro\"></div><div class=\"form-group\"><label class=\"form-label\" for=\"email\">メールアドレス <span style=\"color:var(--color-danger)\">*</span></label> <input class=\"form-control\" type=\"email\" id=\"email\" name=\"email\" required placeholder=\"example@email.com\"><p class=\"form-hint\">登録完了後、マイページURLをお送りします。</p></div><div class=\"form-group\"><p class=\"form-label\">NG行為設定</p><p class=\"form-hint mb-sm\">デフォルトはすべて <strong>NG</strong> です。許可する行為のみ「OK」に変更してください。</p><div class=\"checklist\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			for _, key := range model.NGActionKeys {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"checklist-item\"><span class=\"checklist-label\">")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var4 string
-				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(model.NGActionLabels[key])
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/register/form.templ`, Line: 38, Col: 66}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</span><div class=\"checklist-toggle\"><label><input type=\"radio\" name=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var5 string
-				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs("ng_" + key)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/register/form.templ`, Line: 41, Col: 49}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" value=\"ng\" checked> <span class=\"badge badge-ng\">NG</span></label> <label><input type=\"radio\" name=\"")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				var templ_7745c5c3_Var6 string
-				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs("ng_" + key)
-				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/register/form.templ`, Line: 45, Col: 49}
-				}
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\" value=\"ok\"> <span class=\"badge badge-ok\">OK</span></label></div></div>")
-				if templ_7745c5c3_Err != nil {
-					return templ_7745c5c3_Err
-				}
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "</div></div><button type=\"submit\" class=\"btn btn-primary btn-lg w-full\" style=\"margin-top: var(--space-lg);\">登録する</button></form></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<form method=\"POST\" action=\"/register\"><div class=\"form-group\"><label class=\"form-label\" for=\"handle\">ハンドルネーム <span style=\"color:var(--color-danger)\">*</span></label> <input class=\"form-control\" type=\"text\" id=\"handle\" name=\"handle\" required placeholder=\"例：Taro\"></div><div class=\"form-group\"><label class=\"form-label\" for=\"email\">メールアドレス <span style=\"color:var(--color-danger)\">*</span></label> <input class=\"form-control\" type=\"email\" id=\"email\" name=\"email\" required placeholder=\"example@email.com\"><p class=\"form-hint\">登録完了後、マイページURLをお送りします。</p></div><button type=\"submit\" class=\"btn btn-primary btn-lg w-full\" style=\"margin-top: var(--space-lg);\">登録する</button></form></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -148,12 +96,12 @@ func Done(handle, mypageURL string) templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var7 == nil {
-			templ_7745c5c3_Var7 = templ.NopComponent
+		templ_7745c5c3_Var4 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var4 == nil {
+			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var8 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var5 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
 			if !templ_7745c5c3_IsBuffer {
@@ -165,52 +113,52 @@ func Done(handle, mypageURL string) templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"container register-page\"><div class=\"card\" style=\"max-width: 560px; margin: 0 auto; text-align: center;\"><div style=\"font-size: 48px; margin-bottom: var(--space-md);\">✅</div><h1 class=\"card-title\">登録完了</h1><p>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"container register-page\"><div class=\"card\" style=\"max-width: 560px; margin: 0 auto; text-align: center;\"><div style=\"font-size: 48px; margin-bottom: var(--space-md);\">✅</div><h1 class=\"card-title\">登録完了</h1><p>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var9 string
-			templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(handle)
+			var templ_7745c5c3_Var6 string
+			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(handle)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/register/form.templ`, Line: 68, Col: 15}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/register/form.templ`, Line: 42, Col: 15}
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, " さん、ご登録ありがとうございます。</p><p class=\"text-muted mt-sm\">マイページのURLを登録メールアドレスにお送りしました。</p><div style=\"margin: var(--space-lg) 0; padding: var(--space-md); background: var(--color-surface-2); border-radius: var(--radius); border: 1px solid var(--color-border);\"><p class=\"text-muted text-sm mb-sm\">マイページURL</p><a href=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var10 templ.SafeURL
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(mypageURL))
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/register/form.templ`, Line: 72, Col: 39}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " さん、ご登録ありがとうございます。</p><p class=\"text-muted mt-sm\">マイページのURLを登録メールアドレスにお送りしました。</p><div style=\"margin: var(--space-lg) 0; padding: var(--space-md); background: var(--color-surface-2); border-radius: var(--radius); border: 1px solid var(--color-border);\"><p class=\"text-muted text-sm mb-sm\">マイページURL</p><a href=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\" class=\"text-accent\" style=\"word-break: break-all;\">")
+			var templ_7745c5c3_Var7 templ.SafeURL
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(mypageURL))
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/register/form.templ`, Line: 46, Col: 39}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			var templ_7745c5c3_Var11 string
-			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(mypageURL)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/register/form.templ`, Line: 72, Col: 104}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "\" class=\"text-accent\" style=\"word-break: break-all;\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</a></div><p class=\"text-muted text-sm\">このURLは大切に保管してください。ログイン不要でアクセスできます。</p><a href=\"/events\" class=\"btn btn-primary mt-lg\">開催日一覧を見る</a></div></div>")
+			var templ_7745c5c3_Var8 string
+			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(mypageURL)
+			if templ_7745c5c3_Err != nil {
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/register/form.templ`, Line: 46, Col: 104}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "</a></div><p class=\"text-muted text-sm\">このURLは大切に保管してください。ログイン不要でアクセスできます。</p><a href=\"/events\" class=\"btn btn-primary mt-lg\">開催日一覧を見る</a></div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = layout.Base("登録完了").Render(templ.WithChildren(ctx, templ_7745c5c3_Var8), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = layout.Base("登録完了").Render(templ.WithChildren(ctx, templ_7745c5c3_Var5), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

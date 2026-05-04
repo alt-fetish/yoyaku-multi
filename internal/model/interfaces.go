@@ -24,7 +24,7 @@ type ApplicantStore interface {
 	GetApplicant(id uuid.UUID) (*Applicant, error)
 	GetApplicantByToken(token string) (*Applicant, error)
 	GetApplicantByEmail(email string) (*Applicant, error)
-	CreateApplicant(a *Applicant, ngSettings []*NGSetting) error
+	CreateApplicant(a *Applicant) error
 	ListApplicants() ([]*ApplicantWithCount, error)
 }
 

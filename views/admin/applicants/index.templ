@@ -2,6 +2,8 @@ package admin_applicants
 
 import (
 	"fmt"
+	"strings"
+	"github.com/google/uuid"
 	"github.com/ryotaro/yoyaku-multi/internal/model"
 	"github.com/ryotaro/yoyaku-multi/views/layout"
 )
@@ -56,7 +58,7 @@ templ Index(applicants []*model.ApplicantWithCount) {
 	}
 }
 
-templ Show(a *model.Applicant, ngSettings []*model.NGSetting, entries []*model.EntryWithEvent) {
+templ Show(a *model.Applicant, entries []*model.EntryWithEvent, optionSets map[uuid.UUID]*model.OptionSet, selections map[uuid.UUID][]uuid.UUID) {
 	@layout.AdminBase(a.Handle + " の詳細", "applicants") {
 		<div class="page-header">
 			<h1 class="page-title">{ a.Handle }</h1>
@@ -99,19 +101,8 @@ templ Show(a *model.Applicant, ngSettings []*model.NGSetting, entries []*model.E
 				</script>
 			</div>
 			<div class="card">
-				<h3 class="card-title">NG行為設定</h3>
-				<div class="ng-grid">
-					for _, key := range model.NGActionKeys {
-						<div class="ng-grid-item">
-							<span>{ model.NGActionLabels[key] }</span>
-							if isOK(ngSettings, key) {
-								<span class="badge badge-ok">OK</span>
-							} else {
-								<span class="badge badge-ng">NG</span>
-							}
-						</div>
-					}
-				</div>
+				<h3 class="card-title">オプション管理</h3>
+				<p class="text-muted">オプションは参加者ごとではなく、各イベント申込ごとに管理しています。</p>
 			</div>
 		</div>
 
@@ -127,6 +118,7 @@ templ Show(a *model.Applicant, ngSettings []*model.NGSetting, entries []*model.E
 								<th>日時</th>
 								<th>定員</th>
 								<th>ステータス</th>
+								<th>選択オプション</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -137,6 +129,7 @@ templ Show(a *model.Applicant, ngSettings []*model.NGSetting, entries []*model.E
 										<span class="badge badge-open">{ fmt.Sprintf("%d名", e.Event.Capacity) }</span>
 									</td>
 									<td>{ entryStatusLabel(e.Status) }</td>
+									<td>{ optionLabels(optionSets[e.Event.OptionSetID], selections[e.ID]) }</td>
 								</tr>
 							}
 						</tbody>
@@ -145,15 +138,6 @@ templ Show(a *model.Applicant, ngSettings []*model.NGSetting, entries []*model.E
 			}
 		</div>
 	}
-}
-
-func isOK(settings []*model.NGSetting, key string) bool {
-	for _, s := range settings {
-		if s.ActionKey == key {
-			return s.IsOK
-		}
-	}
-	return false
 }
 
 func entryStatusLabel(s string) string {
@@ -168,4 +152,24 @@ func entryStatusLabel(s string) string {
 		return "取消"
 	}
 	return s
+}
+
+func optionLabels(set *model.OptionSet, selected []uuid.UUID) string {
+	if set == nil || len(selected) == 0 {
+		return "-"
+	}
+	selectedMap := make(map[uuid.UUID]bool, len(selected))
+	for _, id := range selected {
+		selectedMap[id] = true
+	}
+	var labels []string
+	for _, item := range set.Items {
+		if selectedMap[item.ID] {
+			labels = append(labels, item.Label)
+		}
+	}
+	if len(labels) == 0 {
+		return "-"
+	}
+	return strings.Join(labels, ", ")
 }

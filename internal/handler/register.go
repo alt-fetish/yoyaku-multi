@@ -49,24 +49,14 @@ func (h *RegisterHandler) Submit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// NG設定の収集
-	var ngSettings []*model.NGSetting
-	for _, key := range model.NGActionKeys {
-		value := r.FormValue("ng_" + key)
-		ngSettings = append(ngSettings, &model.NGSetting{
-			ActionKey: key,
-			IsOK:      value == "ok",
-		})
-	}
-
 	applicant := &model.Applicant{
 		Handle: handle,
 		Email:  email,
 		Token:  token,
 	}
 
-	if err := h.Applicants.CreateApplicant(applicant, ngSettings); err != nil {
-		register.Form("登録に失敗しました: " + err.Error()).Render(r.Context(), w)
+	if err := h.Applicants.CreateApplicant(applicant); err != nil {
+		register.Form("登録に失敗しました: "+err.Error()).Render(r.Context(), w)
 		return
 	}
 

@@ -1,8 +1,11 @@
 package admin_events
 
-import "github.com/ryotaro/yoyaku-multi/views/layout"
+import (
+	"github.com/ryotaro/yoyaku-multi/internal/model"
+	"github.com/ryotaro/yoyaku-multi/views/layout"
+)
 
-templ New(errMsg string) {
+templ New(errMsg string, optionSets []*model.OptionSet) {
 	@layout.AdminBase("セッション登録", "events") {
 		<div class="page-header">
 			<h1 class="page-title">セッション登録</h1>
@@ -30,6 +33,14 @@ templ New(errMsg string) {
 					<input class="form-control" type="number" id="capacity" name="capacity" min="1" step="1" value="2" required/>
 				</div>
 				<div class="form-group">
+					<label class="form-label" for="option_set_id">オプションセット <span style="color:var(--color-danger)">*</span></label>
+					<select class="form-control" id="option_set_id" name="option_set_id" required>
+						for _, set := range optionSets {
+							<option value={ set.ID.String() }>{ set.Name }</option>
+						}
+					</select>
+				</div>
+				<div class="form-group">
 					<label class="form-label" for="notes">メモ（内部用・非公開）</label>
 					<textarea class="form-control" id="notes" name="notes" rows="3" placeholder="場所・備考など"></textarea>
 				</div>
@@ -48,7 +59,7 @@ templ New(errMsg string) {
 	}
 }
 
-templ Edit(e *EventFormData, errMsg string) {
+templ Edit(e *EventFormData, optionSets []*model.OptionSet, errMsg string) {
 	@layout.AdminBase("開催日編集", "events") {
 		<div class="page-header">
 			<h1 class="page-title">開催日編集</h1>
@@ -77,6 +88,14 @@ templ Edit(e *EventFormData, errMsg string) {
 					<input class="form-control" type="number" id="capacity" name="capacity" min="1" step="1" value={ e.Capacity } required/>
 				</div>
 				<div class="form-group">
+					<label class="form-label" for="option_set_id">オプションセット</label>
+					<select class="form-control" id="option_set_id" name="option_set_id" required>
+						for _, set := range optionSets {
+							<option value={ set.ID.String() } selected?={ set.ID.String() == e.OptionSetID }>{ set.Name }</option>
+						}
+					</select>
+				</div>
+				<div class="form-group">
 					<label class="form-label" for="notes">メモ</label>
 					<textarea class="form-control" id="notes" name="notes" rows="3">{ e.Notes }</textarea>
 				</div>
@@ -91,10 +110,11 @@ templ Edit(e *EventFormData, errMsg string) {
 
 // EventFormData はフォーム表示用のデータ構造
 type EventFormData struct {
-	ID        string
-	EventDate string
-	EventTime string
-	EndTime   string
-	Capacity  string
-	Notes     string
+	ID          string
+	EventDate   string
+	EventTime   string
+	EndTime     string
+	Capacity    string
+	OptionSetID string
+	Notes       string
 }

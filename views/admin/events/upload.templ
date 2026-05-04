@@ -6,7 +6,7 @@ import (
 	"github.com/ryotaro/yoyaku-multi/views/layout"
 )
 
-templ Upload(errMsg string) {
+templ Upload(errMsg string, optionSets []*model.OptionSet, selectedOptionSetID string) {
 	@layout.AdminBase("CSVアップロード", "events") {
 		<div class="page-header">
 			<h1 class="page-title">CSVアップロード</h1>
@@ -29,6 +29,14 @@ templ Upload(errMsg string) {
 				hx-encoding="multipart/form-data"
 			>
 				<div class="form-group">
+					<label class="form-label" for="option_set_id">オプションセット</label>
+					<select class="form-control" id="option_set_id" name="option_set_id" required>
+						for _, set := range optionSets {
+							<option value={ set.ID.String() } selected?={ set.ID.String() == selectedOptionSetID }>{ set.Name }</option>
+						}
+					</select>
+				</div>
+				<div class="form-group">
 					<label class="form-label">CSVファイル</label>
 					<input class="form-control" type="file" name="csv_file" accept=".csv" required/>
 				</div>
@@ -39,7 +47,7 @@ templ Upload(errMsg string) {
 	}
 }
 
-templ UploadPreview(rows []model.EventRow, parseErrors []model.BulkRowResult, errMsg string) {
+templ UploadPreview(rows []model.EventRow, parseErrors []model.BulkRowResult, optionSetID string, errMsg string) {
 	if errMsg != "" {
 		<div class="alert alert-error">{ errMsg }</div>
 	} else {
@@ -75,6 +83,7 @@ templ UploadPreview(rows []model.EventRow, parseErrors []model.BulkRowResult, er
 			</table>
 		</div>
 		<form method="POST" action="/admin/events/upload/confirm">
+			<input type="hidden" name="option_set_id" value={ optionSetID }/>
 			for i, row := range rows {
 				<input type="hidden" name={ fmt.Sprintf("rows[%d][date]", i) } value={ row.Date }/>
 				<input type="hidden" name={ fmt.Sprintf("rows[%d][starttime]", i) } value={ row.StartTime }/>

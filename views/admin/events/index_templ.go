@@ -47,7 +47,7 @@ func Index(events []*model.EventWithCount, statusFilter string) templ.Component 
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"page-header\"><h1 class=\"page-title\">開催日管理</h1><div class=\"page-actions\"><a href=\"/admin/events/new\" class=\"btn btn-primary\">＋ セッション登録</a> <a href=\"/admin/events/upload\" class=\"btn btn-secondary\">📎 CSVアップロード</a></div></div><div class=\"filter-bar\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"page-header\"><h1 class=\"page-title\">開催日管理</h1><div class=\"page-actions\"><a href=\"/admin/events/new\" class=\"btn btn-primary\">＋ セッション登録</a> <a href=\"/admin/options\" class=\"btn btn-secondary\">🧩 オプション管理</a> <a href=\"/admin/events/upload\" class=\"btn btn-secondary\">📎 CSVアップロード</a></div></div><div class=\"filter-bar\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -175,7 +175,7 @@ func Index(events []*model.EventWithCount, statusFilter string) templ.Component 
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs("event-row-" + e.ID.String())
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 47, Col: 43}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 48, Col: 43}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
@@ -188,7 +188,7 @@ func Index(events []*model.EventWithCount, statusFilter string) templ.Component 
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(e.EventDate.Format("2006/01/02"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 49, Col: 42}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 50, Col: 42}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
@@ -201,7 +201,7 @@ func Index(events []*model.EventWithCount, statusFilter string) templ.Component 
 				var templ_7745c5c3_Var15 string
 				templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(e.EventTime.Format("15:04"))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 49, Col: 74}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 50, Col: 74}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 				if templ_7745c5c3_Err != nil {
@@ -215,7 +215,7 @@ func Index(events []*model.EventWithCount, statusFilter string) templ.Component 
 					var templ_7745c5c3_Var16 string
 					templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs("〜" + e.EndTime.Format("15:04"))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 51, Col: 44}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 52, Col: 44}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 					if templ_7745c5c3_Err != nil {
@@ -229,7 +229,7 @@ func Index(events []*model.EventWithCount, statusFilter string) templ.Component 
 				var templ_7745c5c3_Var17 string
 				templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d名", e.Capacity))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 55, Col: 73}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 56, Col: 73}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 				if templ_7745c5c3_Err != nil {
@@ -242,7 +242,7 @@ func Index(events []*model.EventWithCount, statusFilter string) templ.Component 
 				var templ_7745c5c3_Var18 templ.SafeURL
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/admin/events/%s/entries", e.ID.String())))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 58, Col: 87}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 59, Col: 87}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
@@ -255,7 +255,7 @@ func Index(events []*model.EventWithCount, statusFilter string) templ.Component 
 				var templ_7745c5c3_Var19 string
 				templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("%d / %d名", e.EntryCount, e.Capacity))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 59, Col: 62}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 60, Col: 62}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 				if templ_7745c5c3_Err != nil {
@@ -268,7 +268,7 @@ func Index(events []*model.EventWithCount, statusFilter string) templ.Component 
 				var templ_7745c5c3_Var20 string
 				templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(statusBadge(e.Status))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 62, Col: 34}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 63, Col: 34}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
 				if templ_7745c5c3_Err != nil {
@@ -286,7 +286,7 @@ func Index(events []*model.EventWithCount, statusFilter string) templ.Component 
 					var templ_7745c5c3_Var21 templ.SafeURL
 					templ_7745c5c3_Var21, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/admin/events/%s/edit", e.ID.String())))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 66, Col: 86}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 67, Col: 86}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var21))
 					if templ_7745c5c3_Err != nil {
@@ -299,7 +299,7 @@ func Index(events []*model.EventWithCount, statusFilter string) templ.Component 
 					var templ_7745c5c3_Var22 string
 					templ_7745c5c3_Var22, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/admin/events/%s", e.ID.String()))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 69, Col: 69}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 70, Col: 69}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var22))
 					if templ_7745c5c3_Err != nil {
@@ -312,7 +312,7 @@ func Index(events []*model.EventWithCount, statusFilter string) templ.Component 
 					var templ_7745c5c3_Var23 string
 					templ_7745c5c3_Var23, templ_7745c5c3_Err = templ.JoinStringErrs("#event-row-" + e.ID.String())
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 70, Col: 52}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 71, Col: 52}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var23))
 					if templ_7745c5c3_Err != nil {
@@ -331,7 +331,7 @@ func Index(events []*model.EventWithCount, statusFilter string) templ.Component 
 					var templ_7745c5c3_Var24 templ.SafeURL
 					templ_7745c5c3_Var24, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(fmt.Sprintf("/admin/events/%s/done", e.ID.String())))
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 76, Col: 105}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `views/admin/events/index.templ`, Line: 77, Col: 105}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 					if templ_7745c5c3_Err != nil {

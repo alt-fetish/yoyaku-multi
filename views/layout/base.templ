@@ -50,6 +50,11 @@ templ AdminBase(title string, currentPath string) {
 								</a>
 							</li>
 							<li>
+								<a href="/admin/options" class={ templ.KV("active", currentPath == "options") }>
+									🧩 オプション管理
+								</a>
+							</li>
+							<li>
 								<a href="/admin/sessions" class={ templ.KV("active", currentPath == "sessions") }>
 									📋 セッション履歴
 								</a>

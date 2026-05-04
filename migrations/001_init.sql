@@ -18,6 +18,25 @@ CREATE TABLE IF NOT EXISTS ng_settings (
     UNIQUE (applicant_id, action_key)
 );
 
+-- option_sets: 開催イベントごとに割り当てるオプションセット
+CREATE TABLE IF NOT EXISTS option_sets (
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name          TEXT NOT NULL UNIQUE,
+    description   TEXT,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- option_items: 各オプションセット内の選択肢
+CREATE TABLE IF NOT EXISTS option_items (
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    option_set_id UUID NOT NULL REFERENCES option_sets(id) ON DELETE CASCADE,
+    label         TEXT NOT NULL,
+    sort_order    INTEGER NOT NULL DEFAULT 0,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_option_items_set_label ON option_items(option_set_id, label);
+
 -- events: 開催日
 CREATE TABLE IF NOT EXISTS events (
     id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -26,6 +45,7 @@ CREATE TABLE IF NOT EXISTS events (
     event_time    TIME NOT NULL,
     end_time      TIME,
     capacity      INTEGER NOT NULL DEFAULT 2 CHECK (capacity > 0),
+    option_set_id UUID REFERENCES option_sets(id),
     status        TEXT NOT NULL DEFAULT 'open',
     -- open / confirmed / done / cancelled
     notes         TEXT,
@@ -49,3 +69,11 @@ CREATE TABLE IF NOT EXISTS event_entries (
 
 CREATE INDEX IF NOT EXISTS idx_event_entries_event_id ON event_entries(event_id);
 CREATE INDEX IF NOT EXISTS idx_event_entries_applicant_id ON event_entries(applicant_id);
+
+-- event_entry_option_selections: イベント申込ごとのオプション選択
+CREATE TABLE IF NOT EXISTS event_entry_option_selections (
+    event_entry_id UUID NOT NULL REFERENCES event_entries(id) ON DELETE CASCADE,
+    option_item_id UUID NOT NULL REFERENCES option_items(id) ON DELETE CASCADE,
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (event_entry_id, option_item_id)
+);

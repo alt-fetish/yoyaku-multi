@@ -21,6 +21,7 @@ type Event struct {
 	EventTime   time.Time
 	EndTime     *time.Time
 	Capacity    int
+	OptionSetID uuid.UUID
 	Status      string
 	Notes       string
 	CreatedAt   time.Time
@@ -44,14 +45,15 @@ type EventEntry struct {
 // EntryWithApplicant は参加者情報付き表明
 type EntryWithApplicant struct {
 	EventEntry
-	Handle     string
-	NGSettings []*NGSetting
+	Handle                string
+	SelectedOptionItemIDs []uuid.UUID
 }
 
 // EntryWithEvent は開催日情報付き表明
 type EntryWithEvent struct {
 	EventEntry
-	Event Event
+	Event                 Event
+	SelectedOptionItemIDs []uuid.UUID
 }
 
 // EventRow はCSVの1行
@@ -85,10 +87,10 @@ func (r *PostgresEventRepo) GetEvent(id uuid.UUID) (*Event, error) {
 	ctx := context.Background()
 	e := &Event{}
 	err := r.DB.QueryRow(ctx,
-		`SELECT id, session_type, event_date, event_time, end_time, capacity, status, COALESCE(notes,''), created_at
+		`SELECT id, session_type, event_date, event_time, end_time, capacity, option_set_id, status, COALESCE(notes,''), created_at
 		 FROM events WHERE id = $1`,
 		id,
-	).Scan(&e.ID, &e.SessionType, &e.EventDate, &e.EventTime, &e.EndTime, &e.Capacity, &e.Status, &e.Notes, &e.CreatedAt)
+	).Scan(&e.ID, &e.SessionType, &e.EventDate, &e.EventTime, &e.EndTime, &e.Capacity, &e.OptionSetID, &e.Status, &e.Notes, &e.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +100,7 @@ func (r *PostgresEventRepo) GetEvent(id uuid.UUID) (*Event, error) {
 func (r *PostgresEventRepo) ListEvents(status string) ([]*EventWithCount, error) {
 	ctx := context.Background()
 
-	query := `SELECT e.id, e.session_type, e.event_date, e.event_time, e.end_time, e.capacity, e.status,
+	query := `SELECT e.id, e.session_type, e.event_date, e.event_time, e.end_time, e.capacity, e.option_set_id, e.status,
 	                 COALESCE(e.notes,''), e.created_at,
 	                 COUNT(ee.id) AS entry_count
 	          FROM events e
@@ -135,7 +137,7 @@ func (r *PostgresEventRepo) ListEvents(status string) ([]*EventWithCount, error)
 func (r *PostgresEventRepo) ListPublicEvents() ([]*EventWithCount, error) {
 	ctx := context.Background()
 	rows, err := r.DB.Query(ctx,
-		`SELECT e.id, e.session_type, e.event_date, e.event_time, e.end_time, e.capacity, e.status,
+		`SELECT e.id, e.session_type, e.event_date, e.event_time, e.end_time, e.capacity, e.option_set_id, e.status,
 		        COALESCE(e.notes,''), e.created_at,
 		        COUNT(ee.id) AS entry_count
 		 FROM events e
@@ -164,7 +166,7 @@ func scanEventRows(rows pgRows) ([]*EventWithCount, error) {
 		ew := &EventWithCount{}
 		err := rows.Scan(
 			&ew.ID, &ew.SessionType, &ew.EventDate, &ew.EventTime,
-			&ew.EndTime, &ew.Capacity, &ew.Status, &ew.Notes, &ew.CreatedAt,
+			&ew.EndTime, &ew.Capacity, &ew.OptionSetID, &ew.Status, &ew.Notes, &ew.CreatedAt,
 			&ew.EntryCount,
 		)
 		if err != nil {
@@ -184,21 +186,21 @@ func (r *PostgresEventRepo) CreateEvent(e *Event) error {
 		e.Capacity = 2
 	}
 	return r.DB.QueryRow(ctx,
-		`INSERT INTO events (session_type, event_date, event_time, end_time, capacity, status, notes)
-		 VALUES ($1, $2, $3, $4, $5, 'open', $6)
+		`INSERT INTO events (session_type, event_date, event_time, end_time, capacity, option_set_id, status, notes)
+		 VALUES ($1, $2, $3, $4, $5, $6, 'open', $7)
 		 RETURNING id, created_at`,
 		e.SessionType, e.EventDate.Format("2006-01-02"),
-		e.EventTime.Format("15:04"), e.EndTime, e.Capacity, e.Notes,
+		e.EventTime.Format("15:04"), e.EndTime, e.Capacity, e.OptionSetID, e.Notes,
 	).Scan(&e.ID, &e.CreatedAt)
 }
 
 func (r *PostgresEventRepo) UpdateEvent(e *Event) error {
 	ctx := context.Background()
 	_, err := r.DB.Exec(ctx,
-		`UPDATE events SET session_type=$1, event_date=$2, event_time=$3, end_time=$4, capacity=$5, notes=$6, status=$7
-		 WHERE id=$8`,
+		`UPDATE events SET session_type=$1, event_date=$2, event_time=$3, end_time=$4, capacity=$5, option_set_id=$6, notes=$7, status=$8
+		 WHERE id=$9`,
 		e.SessionType, e.EventDate.Format("2006-01-02"),
-		e.EventTime.Format("15:04"), e.EndTime, e.Capacity, e.Notes, e.Status, e.ID,
+		e.EventTime.Format("15:04"), e.EndTime, e.Capacity, e.OptionSetID, e.Notes, e.Status, e.ID,
 	)
 	return err
 }
@@ -239,7 +241,7 @@ func (r *PostgresEventRepo) GetAllApplicantEmails() ([]string, error) {
 }
 
 // BulkCreateEvents はCSVからの一括登録
-func (r *PostgresEventRepo) BulkCreateEvents(rows []EventRow) BulkResult {
+func (r *PostgresEventRepo) BulkCreateEvents(rows []EventRow, optionSetID uuid.UUID) BulkResult {
 	ctx := context.Background()
 	result := BulkResult{}
 
@@ -287,14 +289,15 @@ func (r *PostgresEventRepo) BulkCreateEvents(rows []EventRow) BulkResult {
 		// INSERT（重複時はスキップ）
 		var inserted int
 		err = tx.QueryRow(ctx,
-			`INSERT INTO events (session_type, event_date, event_time, end_time, capacity, status)
-			 VALUES ('group', $1, $2, $3, $4, 'open')
+			`INSERT INTO events (session_type, event_date, event_time, end_time, capacity, option_set_id, status)
+			 VALUES ('group', $1, $2, $3, $4, $5, 'open')
 			 ON CONFLICT (event_date, event_time) DO NOTHING
 			 RETURNING 1`,
 			eventDate.Format("2006-01-02"),
 			startTime.Format("15:04"),
 			endTime,
 			capacity,
+			optionSetID,
 		).Scan(&inserted)
 
 		if err != nil && err.Error() == "no rows in result set" {
@@ -499,7 +502,7 @@ func (r *PostgresEntryRepo) ListEntriesByApplicant(applicantID uuid.UUID) ([]*En
 	ctx := context.Background()
 	rows, err := r.DB.Query(ctx,
 		`SELECT ee.id, ee.event_id, ee.applicant_id, ee.status, ee.created_at,
-		        e.id, e.session_type, e.event_date, e.event_time, e.end_time, e.capacity, e.status, COALESCE(e.notes,''), e.created_at
+		        e.id, e.session_type, e.event_date, e.event_time, e.end_time, e.capacity, e.option_set_id, e.status, COALESCE(e.notes,''), e.created_at
 		 FROM event_entries ee
 		 JOIN events e ON e.id = ee.event_id
 		 WHERE ee.applicant_id = $1
@@ -517,7 +520,7 @@ func (r *PostgresEntryRepo) ListEntriesByApplicant(applicantID uuid.UUID) ([]*En
 		if err := rows.Scan(
 			&ew.ID, &ew.EventID, &ew.ApplicantID, &ew.Status, &ew.CreatedAt,
 			&ew.Event.ID, &ew.Event.SessionType, &ew.Event.EventDate, &ew.Event.EventTime,
-			&ew.Event.EndTime, &ew.Event.Capacity, &ew.Event.Status, &ew.Event.Notes, &ew.Event.CreatedAt,
+			&ew.Event.EndTime, &ew.Event.Capacity, &ew.Event.OptionSetID, &ew.Event.Status, &ew.Event.Notes, &ew.Event.CreatedAt,
 		); err != nil {
 			return nil, err
 		}

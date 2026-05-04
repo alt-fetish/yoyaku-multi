@@ -61,14 +61,7 @@ templ EventCard(e *model.EventWithCount, applicantToken string, hasEntry bool) {
 			} else if isSoldOut(e.Capacity, e.EntryCount) {
 				<button class="btn btn-secondary" disabled>SOLD OUT</button>
 			} else {
-				<button
-					class="btn btn-primary"
-					hx-post={ fmt.Sprintf("/events/%s/entry?token=%s", e.ID.String(), applicantToken) }
-					hx-target={ "#event-" + e.ID.String() }
-					hx-swap="outerHTML"
-				>
-					参加したい
-				</button>
+				<a href={ templ.SafeURL(fmt.Sprintf("/events/%s?token=%s", e.ID.String(), applicantToken)) } class="btn btn-primary">参加したい</a>
 			}
 		</div>
 	</div>

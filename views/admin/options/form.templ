@@ -1,0 +1,53 @@
+package admin_options
+
+import "github.com/ryotaro/yoyaku-multi/views/layout"
+
+type OptionSetFormData struct {
+	ID          string
+	Name        string
+	Description string
+	ItemsText   string
+}
+
+templ New(formData *OptionSetFormData, errMsg string) {
+	@layout.AdminBase("オプションセット作成", "options") {
+		@Form("新規オプションセット", "/admin/options", formData, errMsg)
+	}
+}
+
+templ Edit(formData *OptionSetFormData, errMsg string) {
+	@layout.AdminBase("オプションセット編集", "options") {
+		@Form("オプションセット編集", "/admin/options/" + formData.ID + "/edit", formData, errMsg)
+	}
+}
+
+templ Form(title string, action string, formData *OptionSetFormData, errMsg string) {
+	<div class="page-header">
+		<h1 class="page-title">{ title }</h1>
+		<a href="/admin/options" class="btn btn-secondary">← 一覧に戻る</a>
+	</div>
+	<div class="card" style="max-width: 720px;">
+		if errMsg != "" {
+			<div class="alert alert-error">{ errMsg }</div>
+		}
+		<form method="POST" action={ templ.SafeURL(action) }>
+			<div class="form-group">
+				<label class="form-label" for="name">セット名 <span style="color:var(--color-danger)">*</span></label>
+				<input class="form-control" type="text" id="name" name="name" value={ formData.Name } required/>
+			</div>
+			<div class="form-group">
+				<label class="form-label" for="description">説明</label>
+				<textarea class="form-control" id="description" name="description" rows="2">{ formData.Description }</textarea>
+			</div>
+			<div class="form-group">
+				<label class="form-label" for="items_text">選択肢 <span style="color:var(--color-danger)">*</span></label>
+				<textarea class="form-control" id="items_text" name="items_text" rows="8" required>{ formData.ItemsText }</textarea>
+				<p class="form-hint">1行につき1項目です。申込画面では複数選択できます。</p>
+			</div>
+			<div class="flex gap-sm mt-md">
+				<button type="submit" class="btn btn-primary">保存する</button>
+				<a href="/admin/options" class="btn btn-secondary">キャンセル</a>
+			</div>
+		</form>
+	</div>
+}

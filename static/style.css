@@ -199,6 +199,16 @@ ul, ol {
     flex-wrap: wrap;
 }
 
+.stack-sm {
+    display: grid;
+    gap: var(--space-sm);
+}
+
+.stack-lg {
+    display: grid;
+    gap: var(--space-lg);
+}
+
 /* =========================
    4. Components
    ========================= */
